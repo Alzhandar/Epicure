@@ -7,7 +7,7 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "8000:8000"
+      - "8080:8080"
     env_file:
       - .env
     depends_on:
@@ -15,10 +15,10 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+             gunicorn core.wsgi:application --bind 0.0.0.0:8080"
 
   db:
-    image: postgres:15
+    image: postgres:14
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
