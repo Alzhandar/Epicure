@@ -41,10 +41,11 @@ class CityViewSet(viewsets.ModelViewSet):
             )
         ),
         responses={
-            200: 'Успешное обновление позиций',
-            400: 'Неверный формат данных'
+            200: openapi.Response(description='Успешное обновление позиций'),
+            400: openapi.Response(description='Неверный формат данных')
         },
-        operation_description="Изменение порядка городов. Принимает массив объектов с id и position."
+        operation_description="Изменение порядка городов. Принимает массив объектов с id и position.",
+        tags=['cities']
     )
     @action(detail=False, methods=['post'])
     def reorder(self, request):

@@ -57,10 +57,14 @@ class UserViewSet(viewsets.ModelViewSet):
         responses={
             200: openapi.Response(
                 description="Успешное получение профиля",
-                schema=ProfileSerializer()
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    title="Профиль"
+                )
             ),
-            401: "Не авторизован"
-        }
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['users'] 
     )
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -71,10 +75,11 @@ class UserViewSet(viewsets.ModelViewSet):
         operation_description="Изменение пароля пользователя",
         request_body=PasswordChangeSerializer,
         responses={
-            200: "Пароль успешно изменен",
-            400: "Некорректные данные",
-            404: "Пользователь не найден"
-        }
+            200: openapi.Response(description="Пароль успешно изменен"),
+            400: openapi.Response(description="Некорректные данные"),
+            404: openapi.Response(description="Пользователь не найден")
+        },
+        tags=['users']
     )
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsUpdatingOwnAccount])
     def change_password(self, request, pk=None):
@@ -98,9 +103,11 @@ class UserViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Активация пользователя",
         responses={
-            200: "Пользователь успешно активирован",
-            404: "Пользователь не найден"
-        }
+            200: openapi.Response(description="Пользователь успешно активирован"),
+            403: openapi.Response(description="Недостаточно прав"),
+            404: openapi.Response(description="Пользователь не найден")
+        },
+        tags=['users']
     )
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def activate(self, request, pk=None):
@@ -119,9 +126,11 @@ class UserViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_description="Деактивация пользователя",
         responses={
-            200: "Пользователь успешно деактивирован",
-            404: "Пользователь не найден"
-        }
+            200: openapi.Response(description="Пользователь успешно деактивирован"),
+            403: openapi.Response(description="Недостаточно прав"),
+            404: openapi.Response(description="Пользователь не найден")
+        },
+        tags=['users']
     )
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def deactivate(self, request, pk=None):
@@ -146,9 +155,10 @@ class UserRegistrationView(generics.CreateAPIView):
     @swagger_auto_schema(
         operation_description="Регистрация нового пользователя",
         responses={
-            201: "Пользователь успешно создан",
-            400: "Некорректные данные"
-        }
+            201: openapi.Response(description="Пользователь успешно создан"),
+            400: openapi.Response(description="Некорректные данные")
+        },
+        tags=['users']
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
