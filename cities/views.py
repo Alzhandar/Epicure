@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Max
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .models import City
 from .permissions import IsAdminOrReadOnly
@@ -25,6 +27,25 @@ class CityViewSet(viewsets.ModelViewSet):
         else:
             serializer.save()
     
+    @swagger_auto_schema(
+        method='post',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID города'),
+                    'position': openapi.Schema(type=openapi.TYPE_INTEGER, description='Новая позиция')
+                },
+                required=['id', 'position']
+            )
+        ),
+        responses={
+            200: 'Успешное обновление позиций',
+            400: 'Неверный формат данных'
+        },
+        operation_description="Изменение порядка городов. Принимает массив объектов с id и position."
+    )
     @action(detail=False, methods=['post'])
     def reorder(self, request):
         items = request.data
@@ -40,5 +61,3 @@ class CityViewSet(viewsets.ModelViewSet):
                 pass
                 
         return Response(status=status.HTTP_200_OK)
-
-
