@@ -3,6 +3,7 @@ env/
 ENV/
 .venv/
 .env
+myvenv/
 
 *.sqlite3
 *.sqlite3-journal
