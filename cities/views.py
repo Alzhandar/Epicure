@@ -47,6 +47,7 @@ class CityViewSet(viewsets.ModelViewSet):
         operation_description="Изменение порядка городов. Принимает массив объектов с id и position.",
         tags=['cities']
     )
+    
     @action(detail=False, methods=['post'])
     def reorder(self, request):
         items = request.data
