@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     # Local apps
     'cities',
     'users',
-    'restaurant'
+    'restaurant',
 
 
     # libs
