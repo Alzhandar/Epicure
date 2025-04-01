@@ -22,3 +22,4 @@ django-debug-toolbar==4.3.0
 Markdown==3.5.1
 pillow
 djangorestframework-simplejwt
+gunicorn==21.2.0
