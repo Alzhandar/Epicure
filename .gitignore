@@ -8,3 +8,13 @@ myvenv/
 *.sqlite3
 *.sqlite3-journal
 *.db
+
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*$py.class
