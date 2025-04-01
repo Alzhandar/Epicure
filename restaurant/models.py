@@ -54,5 +54,5 @@ class Restaurant(models.Model):
 
     class Meta:
         verbose_name = 'Ресторан'
-        verbose_name_plural = 'Рестораны'
+        verbose_name_plural = 'Ресторан'
         indexes = [models.Index(fields=['name'])]
