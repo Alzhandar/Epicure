@@ -56,3 +56,25 @@ class Restaurant(models.Model):
         verbose_name = 'Ресторан'
         verbose_name_plural = 'Ресторан'
         indexes = [models.Index(fields=['name'])]
+
+
+class Section(models.Model):
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='sections',
+        verbose_name='Ресторан'
+    )
+    name = models.CharField(
+        'Название секции',
+        max_length=255
+    )
+
+    def __str__(self):
+        return f"{self.restaurant.name} - {self.name}"
+
+    class Meta:
+        verbose_name = 'Секция'
+        verbose_name_plural = 'Секции'
+        indexes = [models.Index(fields=['restaurant', 'name'])]
+        unique_together = ['restaurant', 'name']

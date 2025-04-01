@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Restaurant
+from .models import Restaurant, Section
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
@@ -42,3 +42,25 @@ class RestaurantAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('city')
+    
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'restaurant')
+    list_filter = ('restaurant',)
+    search_fields = ('name', 'restaurant__name')
+    readonly_fields = ('get_created', 'get_modified')
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('name', 'restaurant')
+        }),
+    )
+
+    def get_created(self, obj):
+        return getattr(obj, 'created_at', 'Нет данных')
+    get_created.short_description = 'Дата создания'
+
+    def get_modified(self, obj):
+        return getattr(obj, 'modified_at', 'Нет данных')
+    get_modified.short_description = 'Последнее изменение'
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('restaurant')
