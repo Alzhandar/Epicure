@@ -13,6 +13,6 @@ COPY . .
 
 RUN chmod -R 755 /usr/src/app/static /usr/src/app/staticfiles /usr/src/app/media
 
-EXPOSE 8080
+EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
