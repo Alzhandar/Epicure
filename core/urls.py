@@ -36,6 +36,7 @@ api_info = openapi.Info(
 api_url_patterns = [
     path('api/v1/', include('cities.urls')),
     path('api/v1/', include('users.urls')),
+    path('api/v1/', include('restaurant.urls')),
 ]
 
 schema_view = get_schema_view(
@@ -50,7 +51,7 @@ urlpatterns = [
     
     path('api/v1/', include('cities.urls')),
     path('api/v1/', include('users.urls')),
-    
+    path('api/v1/', include('restaurant.urls')), 
     path('', RedirectView.as_view(url='/api/swagger/', permanent=False)),
     
     re_path(r'^api/swagger(?P<format>\.json|\.yaml)$', 
