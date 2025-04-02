@@ -167,9 +167,9 @@ class TableAdmin(admin.ModelAdmin):
                 'border-radius: 4px; font-size: 12px;">'
                 'Перейти</a>'
                 '</div>',
-                f"{settings.AVATARIYA_BASE_URL}/{obj.uuid}/", 
+                f"{settings.BASE_URL}/{obj.uuid}/", 
                 obj.qr.url,  
-                f"{settings.AVATARIYA_BASE_URL}/{obj.uuid}/"   
+                f"{settings.BASE_URL}/{obj.uuid}/"   
             )
         return "QR код отсутствует"
     qr_preview.short_description = 'QR код'

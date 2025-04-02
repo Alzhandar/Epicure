@@ -154,7 +154,7 @@ class Table(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.qr:
-            link = f"{settings.AVATARIYA_BASE_URL}/{self.uuid}/"
+            link = f"{settings.BASE_URL}/{self.uuid}/"
             
             qr = qrcode.QRCode(
                 version=1,
