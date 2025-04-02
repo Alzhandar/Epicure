@@ -57,6 +57,30 @@ class Menu(models.Model):
         verbose_name='Калории (ккал)',
         help_text='Укажите калорийность блюда в килокалориях'
     )
+    proteins = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Белки (г)',
+        help_text='Укажите количество белков в граммах'
+    )
+    fats = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Жиры (г)',
+        help_text='Укажите количество жиров в граммах'
+    )
+    carbohydrates = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Углеводы (г)',
+        help_text='Укажите количество углеводов в граммах'
+    )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -90,4 +114,3 @@ class Menu(models.Model):
             models.Index(fields=['name_ru', 'restaurant']),
             models.Index(fields=['is_available']),
         ]
-        ordering = ['-created_at'] 

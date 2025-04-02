@@ -26,7 +26,7 @@ class MenuAdmin(admin.ModelAdmin):
             'fields': ('restaurant', 'menu_type', 'name_ru', 'name_kz', 'image', 'description')
         }),
         ('Дополнительная информация', {
-            'fields': ('calories', 'price', 'is_available')
+            'fields': ('calories', 'proteins', 'fats', 'price', 'is_available')
         }),
         ('Временные метки', {
             'fields': ('created_at', 'updated_at')
