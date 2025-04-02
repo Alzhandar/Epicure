@@ -27,8 +27,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOW_HOSTS', '127.0.0.1,localhost,192.168.1.222').split(',')
 
 
 # Application definition
@@ -45,7 +44,7 @@ INSTALLED_APPS = [
     'cities',
     'users',
     'restaurant',
-
+    'products',
 
     # libs
     'rest_framework',

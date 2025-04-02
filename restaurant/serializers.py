@@ -22,3 +22,4 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['uuid', 'number', 'section', 'qr', 'call_waiter', 'call_time', 'bill_waiter', 'bill_time', 'iiko_waiter_id']
+
