@@ -18,3 +18,7 @@ __pycache__/
 *.pyd
 .Python
 *$py.class
+
+media/
+# static/
+staticfiles/
