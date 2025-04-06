@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     # libs
     'rest_framework',
+    'rest_framework_simplejwt',
     'django_filters',
     'corsheaders',
     'drf_yasg',
