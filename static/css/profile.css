@@ -1,5 +1,6 @@
 .profile-container {
-    padding: 3rem 0;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
   }
   
   .profile-header {
@@ -8,325 +9,327 @@
   }
   
   .profile-title {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-family: var(--font-family-serif);
     font-weight: 700;
+    font-size: 2rem;
     color: var(--color-primary);
-    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
   }
   
   .profile-subtitle {
     color: var(--color-gray-600);
     font-size: 1.125rem;
+    margin-bottom: 1.5rem;
   }
   
-  .profile-avatar-section {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-  
-  .profile-avatar-wrapper {
-    position: relative;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-bottom: 1rem;
+  .profile-card {
     box-shadow: var(--shadow-md);
-    border: 4px solid var(--color-white);
-    background-color: var(--color-gray-100);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background-color: var(--color-white);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  .profile-avatar-wrapper:hover {
+  .profile-card:hover {
     box-shadow: var(--shadow-lg);
   }
   
-  .profile-avatar {
+  .profile-card-header {
+    background: linear-gradient(45deg, var(--color-gray-900), var(--color-gray-700));
+    color: var(--color-white);
+    padding: 2rem;
+    position: relative;
+  }
+  
+  .profile-image-container {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--color-white);
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  
+  .profile-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
   
-  .profile-avatar-placeholder {
+  .profile-avatar {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-gray-200);
-    color: var(--color-gray-600);
-    font-size: 3rem;
-    font-weight: 600;
+    font-size: 4rem;
+    font-weight: 500;
+    background-color: var(--color-gray-300);
+    color: var(--color-gray-700);
   }
   
-  .profile-avatar-edit {
+  .profile-image-edit {
     position: absolute;
     bottom: 0;
     right: 0;
-    background-color: var(--color-primary);
-    color: var(--color-white);
     width: 40px;
     height: 40px;
+    background-color: var(--color-white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid var(--color-white);
+    cursor: pointer;
+    transition: all 0.3s ease;
     box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
   }
   
-  .profile-avatar-edit:hover {
-    transform: scale(1.1);
-    background-color: var(--color-gray-800);
-  }
-  
-  .profile-avatar-edit input[type="file"] {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-  }
-  
-  .profile-name {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--color-primary);
-    text-align: center;
-  }
-  
-  .profile-role {
-    color: var(--color-gray-600);
-    font-size: 0.9375rem;
-    text-align: center;
-    margin-bottom: 0;
-  }
-  
-  .profile-card {
-    margin-bottom: 2rem;
-    border-radius: var(--radius-lg);
+  .profile-image-edit:hover {
+    background-color: var(--color-gray-100);
     box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
   }
   
-  .profile-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-  }
-  
-  .profile-card-header {
-    padding: 1.5rem;
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .profile-card-header::before {
-    content: "";
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  .profile-card-title {
-    font-size: 1.25rem;
+  .profile-card-name {
+    text-align: center;
+    margin-top: 1.25rem;
     font-weight: 600;
-    margin-bottom: 0;
-    position: relative;
-    z-index: 1;
+    font-size: 1.5rem;
+  }
+  
+  .profile-card-phone {
+    text-align: center;
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.8);
   }
   
   .profile-card-body {
     padding: 2rem;
-    background-color: var(--color-white);
   }
   
-  /* Информационные блоки профиля */
-  .profile-info-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .profile-info-item {
-    padding: 0.875rem 0;
-    display: flex;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--color-gray-200);
-  }
-  
-  .profile-info-item:last-child {
-    border-bottom: none;
-  }
-  
-  .profile-info-icon {
-    margin-right: 1rem;
-    color: var(--color-gray-500);
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .profile-info-content {
-    flex: 1;
+  .profile-info-group {
+    margin-bottom: 1.75rem;
   }
   
   .profile-info-label {
-    font-size: 0.875rem;
-    color: var(--color-gray-500);
-    margin-bottom: 0.25rem;
     display: block;
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+    margin-bottom: 0.375rem;
+    font-weight: 500;
   }
   
   .profile-info-value {
-    font-weight: 500;
-    color: var(--color-gray-900);
-    margin-bottom: 0;
-  }
-  
-  /* Секция с действиями профиля */
-  .profile-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-  
-  .profile-action-card {
-    padding: 1.5rem;
-    background-color: var(--color-gray-50);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-gray-200);
-    transition: all 0.3s ease;
-    text-align: center;
-    cursor: pointer;
-  }
-  
-  .profile-action-card:hover {
-    background-color: var(--color-white);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-3px);
-    border-color: var(--color-gray-300);
-  }
-  
-  .profile-action-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: var(--color-gray-100);
-    color: var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 1.25rem;
-    transition: all 0.3s ease;
-  }
-  
-  .profile-action-card:hover .profile-action-icon {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-  }
-  
-  .profile-action-title {
     font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--color-gray-800);
-  }
-  
-  .profile-action-description {
-    font-size: 0.875rem;
-    color: var(--color-gray-600);
-    margin-bottom: 0;
-  }
-  
-  /* История бронирований */
-  .booking-history-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .booking-history-table th,
-  .booking-history-table td {
-    padding: 0.875rem;
-    text-align: left;
+    color: var(--color-gray-900);
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-gray-200);
   }
   
-  .booking-history-table th {
+  .profile-info-blank {
+    font-style: italic;
+    color: var(--color-gray-500);
+  }
+  
+  .profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  
+  .booking-history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .booking-history-title {
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--color-primary);
+  }
+  
+  .booking-filters {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .booking-item {
+    border-bottom: 1px solid var(--color-gray-200);
+    padding: 1.25rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .booking-item:first-child {
+    padding-top: 0;
+  }
+  
+  .booking-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .booking-item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--color-primary);
+  }
+  
+  .booking-item-content {
+    flex: 1;
+  }
+  
+  .booking-item-title {
     font-weight: 600;
+    margin-bottom: 0.375rem;
+    color: var(--color-gray-900);
+  }
+  
+  .booking-item-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     font-size: 0.875rem;
-    color: var(--color-gray-700);
-    background-color: var(--color-gray-50);
+    color: var(--color-gray-600);
+    margin-bottom: 0.5rem;
   }
   
-  .booking-history-table tr:hover {
-    background-color: var(--color-gray-50);
+  .booking-item-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
   }
   
-  .booking-history-table .status {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
+  .booking-item-detail i {
+    font-size: 0.9375rem;
+    color: var(--color-gray-500);
+  }
+  
+  .booking-item-status {
+    padding: 0.25rem 0.75rem;
     border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 500;
   }
   
-  .booking-history-table .status-completed {
-    background-color: #d1e7dd;
-    color: #146c43;
+  .status-completed {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: rgb(25, 135, 84);
   }
   
-  .booking-history-table .status-pending {
-    background-color: #fff3cd;
-    color: #856404;
+  .status-upcoming {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: rgb(13, 110, 253);
   }
   
-  .booking-history-table .status-cancelled {
-    background-color: #f8d7da;
-    color: #dc3545;
+  .status-canceled {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: rgb(220, 53, 69);
   }
   
-  /* Адаптивность */
-  @media (max-width: 768px) {
-    .profile-container {
-      padding: 1.5rem 0;
+  .booking-item-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .empty-bookings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--color-gray-600);
+  }
+  
+  .empty-bookings-icon {
+    font-size: 3rem;
+    color: var(--color-gray-400);
+    margin-bottom: 1rem;
+  }
+  
+  .empty-bookings-text {
+    max-width: 400px;
+    margin: 0.5rem 0 1.5rem;
+  }
+  
+  /* Адаптивность для мобильных устройств */
+  @media (max-width: 767px) {
+    .profile-card-header {
+      padding: 1.5rem;
     }
     
-    .profile-title {
-      font-size: 1.75rem;
+    .profile-image-container {
+      width: 100px;
+      height: 100px;
     }
     
-    .profile-avatar-wrapper {
-      width: 120px;
-      height: 120px;
+    .profile-card-name {
+      font-size: 1.25rem;
     }
     
-    .booking-history-table {
-      display: block;
-      overflow-x: auto;
+    .profile-card-body {
+      padding: 1.5rem;
     }
     
-    .profile-info-item {
+    .profile-actions {
       flex-direction: column;
     }
     
-    .profile-info-icon {
-      margin-bottom: 0.5rem;
+    .profile-actions .btn {
+      width: 100%;
     }
+    
+    .booking-history-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .booking-filters {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+  }
+  
+  /* Анимации */
+  @keyframes slideInUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .slide-in-up {
+    animation: slideInUp 0.5s ease forwards;
+  }
+  
+  .animation-delay-1 {
+    animation-delay: 0.1s;
+  }
+  
+  .animation-delay-2 {
+    animation-delay: 0.25s;
+  }
+  
+  .animation-delay-3 {
+    animation-delay: 0.4s;
   }

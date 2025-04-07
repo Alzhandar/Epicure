@@ -1,71 +1,247 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Мой профиль - Epicure{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">Мой профиль</h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 text-center mb-4 mb-md-0">
+<div class="profile-container">
+    <div class="profile-header fade-in-element">
+        <h1 class="profile-title">Мой профиль</h1>
+        <p class="profile-subtitle">Управление личной информацией и историей бронирований</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 mb-4 fade-in-element animation-delay-1">
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <div class="profile-image-container">
                         {% if user.image %}
-                            <img src="{{ user.image.url }}" alt="{{ user.full_name }}" class="img-fluid rounded-circle" style="max-width: 150px;">
+                            <img src="{{ user.image.url }}" alt="{{ user.full_name }}" class="profile-image">
                         {% else %}
-                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px; font-size: 48px;">
+                            <div class="profile-avatar">
                                 {{ user.name.0 }}{{ user.last_name.0|default:"" }}
                             </div>
                         {% endif %}
-                    </div>
-                    <div class="col-md-8">
-                        <h2 class="mb-3">{{ user.full_name }}</h2>
-                        
-                        <div class="mb-3">
-                            <h6 class="text-muted">Номер телефона</h6>
-                            <p>{{ user.phone_number }}</p>
-                        </div>
-                        
-                        {% if user.email %}
-                        <div class="mb-3">
-                            <h6 class="text-muted">Email</h6>
-                            <p>{{ user.email }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if user.city %}
-                        <div class="mb-3">
-                            <h6 class="text-muted">Город</h6>
-                            <p>{{ user.city.name }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        <div>
-                            <h6 class="text-muted">Язык интерфейса</h6>
-                            <p>{{ user.get_language_display }}</p>
+                        <div class="profile-image-edit">
+                            <i class="fas fa-camera"></i>
                         </div>
                     </div>
+                    <h2 class="profile-card-name">{{ user.full_name }}</h2>
+                    <p class="profile-card-phone">{{ user.phone_number }}</p>
                 </div>
-                
-                <hr>
-                
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a href="#" class="btn btn-outline-dark">Изменить профиль</a>
-                    <a href="#" class="btn btn-outline-danger">Изменить пароль</a>
+                <div class="profile-card-body">
+                    <div class="profile-info-group">
+                        <span class="profile-info-label">Номер телефона</span>
+                        <p class="profile-info-value">{{ user.phone_number }}</p>
+                    </div>
+                    
+                    <div class="profile-info-group">
+                        <span class="profile-info-label">Email</span>
+                        <p class="profile-info-value">
+                            {% if user.email %}
+                                {{ user.email }}
+                            {% else %}
+                                <span class="profile-info-blank">Не указан</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="profile-info-group">
+                        <span class="profile-info-label">Город</span>
+                        <p class="profile-info-value">
+                            {% if user.city %}
+                                {{ user.city.name }}
+                            {% else %}
+                                <span class="profile-info-blank">Не указан</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="profile-info-group">
+                        <span class="profile-info-label">Язык интерфейса</span>
+                        <p class="profile-info-value">{{ user.get_language_display }}</p>
+                    </div>
+                    
+                    <div class="profile-info-group">
+                        <span class="profile-info-label">Дата регистрации</span>
+                        <p class="profile-info-value">{{ user.created_at|date:"d.m.Y" }}</p>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Редактировать
+                        </a>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fas fa-key me-2"></i>Сменить пароль
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">История бронирований</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-center">У вас пока нет истории бронирований</p>
+        <div class="col-lg-8 fade-in-element animation-delay-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="booking-history-header">
+                        <h3 class="booking-history-title">История бронирований</h3>
+                        <div class="booking-filters">
+                            <button class="btn btn-sm btn-outline-primary active">Все</button>
+                            <button class="btn btn-sm btn-outline-primary">Предстоящие</button>
+                            <button class="btn btn-sm btn-outline-primary">Завершённые</button>
+                            <button class="btn btn-sm btn-outline-primary">Отменённые</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if False %}
+                    <div class="booking-item">
+                        <div class="booking-item-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="booking-item-content">
+                            <h4 class="booking-item-title">Epicure Премиум — VIP зал</h4>
+                            <div class="booking-item-details">
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>10 апреля 2025 г.</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>18:00 - 22:00</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-user-friends"></i>
+                                    <span>8 гостей</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>40 000 ₸</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="booking-item-status status-upcoming">Предстоящее</span>
+                                <div class="booking-item-actions">
+                                    <button class="btn btn-sm btn-outline-dark">
+                                        <i class="fas fa-info-circle me-1"></i>Детали
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times me-1"></i>Отменить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-item">
+                        <div class="booking-item-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="booking-item-content">
+                            <h4 class="booking-item-title">Epicure Центральный — Конференц-зал</h4>
+                            <div class="booking-item-details">
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>2 марта 2025 г.</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>10:00 - 14:00</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-user-friends"></i>
+                                    <span>12 гостей</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>55 000 ₸</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="booking-item-status status-completed">Завершено</span>
+                                <div class="booking-item-actions">
+                                    <button class="btn btn-sm btn-outline-dark">
+                                        <i class="fas fa-info-circle me-1"></i>Детали
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-star me-1"></i>Отзыв
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-item">
+                        <div class="booking-item-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="booking-item-content">
+                            <h4 class="booking-item-title">Epicure Хан Шатыр — Малый зал</h4>
+                            <div class="booking-item-details">
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>15 февраля 2025 г.</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>19:00 - 23:00</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-user-friends"></i>
+                                    <span>6 гостей</span>
+                                </div>
+                                <div class="booking-item-detail">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>32 000 ₸</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="booking-item-status status-canceled">Отменено</span>
+                                <div class="booking-item-actions">
+                                    <button class="btn btn-sm btn-outline-dark">
+                                        <i class="fas fa-info-circle me-1"></i>Детали
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-bookings fade-in-element animation-delay-3">
+                        <i class="fas fa-calendar-alt empty-bookings-icon"></i>
+                        <h4>У вас пока нет бронирований</h4>
+                        <p class="empty-bookings-text">Забронируйте комнату для мероприятия в одном из наших ресторанов и она появится здесь.</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Найти ресторан
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.booking-filters .btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        const imageEditButton = document.querySelector('.profile-image-edit');
+        if (imageEditButton) {
+            imageEditButton.addEventListener('click', function() {
+                alert('Функционал загрузки фотографии находится в разработке');
+            });
+        }
+    });
+</script>
 {% endblock %}

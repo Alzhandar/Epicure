@@ -92,7 +92,63 @@
     </div>
 </section>
 {% endif %}
+<!-- Добавить эту секцию после секции hero и перед секцией restaurants-section -->
 
+<section class="dishes-showcase">
+    <div class="section-header fade-in-element">
+        <h2 class="section-title">Популярные блюда</h2>
+        <div class="section-controls">
+            <button class="scroll-btn scroll-left" aria-label="Предыдущее блюдо">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-btn scroll-right" aria-label="Следующее блюдо">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="dishes-carousel-container fade-in-element animation-delay-1">
+        <div class="dishes-carousel" id="dishesCarousel">
+            {% for item in menu_items %}
+            <div class="dish-card">
+                <div class="dish-image-container">
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name_ru }}" class="dish-image">
+                    {% else %}
+                        <div class="dish-image-placeholder">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                    {% endif %}
+                    {% if item.is_healthy %}
+                        <span class="dish-tag healthy-tag">
+                            <i class="fas fa-leaf"></i> ЗОЖ
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="dish-content">
+                    <h3 class="dish-title">{{ item.name_ru }}</h3>
+                    <p class="dish-type">{{ item.menu_type.name|default:"Основное меню" }}</p>
+                    <div class="dish-details">
+                        <div class="dish-price">{{ item.price }} ₸</div>
+                        {% if user.is_authenticated %}
+                        <button class="dish-order-btn" data-dish-id="{{ item.id }}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-dishes">
+                <div class="empty-dishes-message">
+                    <i class="fas fa-hamburger empty-dishes-icon"></i>
+                    <p>Пока нет доступных блюд</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 <div class="modal fade" id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -131,8 +187,10 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script src="{% static 'js/modal.js' %}"></script>
+<script src="{% static 'js/dishes-carousel.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         {% if is_first_visit %}
