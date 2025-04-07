@@ -267,16 +267,24 @@
 </div>
 {% endblock %}
 
+<!-- Обновите блок extra_js в конце файла -->
+
 {% block extra_js %}
-<script src="{% static 'js/modal.js' %}"></script>
 <script src="{% static 'js/dishes-carousel.js' %}"></script>
 <script src="{% static 'js/dish-detail.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Первое посещение - показываем модальное окно выбора города
         {% if is_first_visit %}
         document.body.setAttribute('data-first-visit', '');
+        const cityModal = document.getElementById('cityModal');
+        if (cityModal) {
+            const modal = new bootstrap.Modal(cityModal);
+            modal.show();
+        }
         {% endif %}
         
+        // Анимация элементов при прокрутке
         const fadeElements = document.querySelectorAll('.fade-in-element');
         if ('IntersectionObserver' in window) {
             const observer = new IntersectionObserver((entries) => {
