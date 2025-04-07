@@ -1,0 +1,332 @@
+.profile-container {
+    padding: 3rem 0;
+  }
+  
+  .profile-header {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .profile-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: -0.025em;
+  }
+  
+  .profile-subtitle {
+    color: var(--color-gray-600);
+    font-size: 1.125rem;
+  }
+  
+  .profile-avatar-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .profile-avatar-wrapper {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--color-white);
+    background-color: var(--color-gray-100);
+    transition: all 0.3s ease;
+  }
+  
+  .profile-avatar-wrapper:hover {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-gray-200);
+    color: var(--color-gray-600);
+    font-size: 3rem;
+    font-weight: 600;
+  }
+  
+  .profile-avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--color-white);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .profile-avatar-edit:hover {
+    transform: scale(1.1);
+    background-color: var(--color-gray-800);
+  }
+  
+  .profile-avatar-edit input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+    text-align: center;
+  }
+  
+  .profile-role {
+    color: var(--color-gray-600);
+    font-size: 0.9375rem;
+    text-align: center;
+    margin-bottom: 0;
+  }
+  
+  .profile-card {
+    margin-bottom: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .profile-card-header {
+    padding: 1.5rem;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-card-header::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .profile-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .profile-card-body {
+    padding: 2rem;
+    background-color: var(--color-white);
+  }
+  
+  /* Информационные блоки профиля */
+  .profile-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .profile-info-item {
+    padding: 0.875rem 0;
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+  
+  .profile-info-item:last-child {
+    border-bottom: none;
+  }
+  
+  .profile-info-icon {
+    margin-right: 1rem;
+    color: var(--color-gray-500);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .profile-info-content {
+    flex: 1;
+  }
+  
+  .profile-info-label {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+  
+  .profile-info-value {
+    font-weight: 500;
+    color: var(--color-gray-900);
+    margin-bottom: 0;
+  }
+  
+  /* Секция с действиями профиля */
+  .profile-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .profile-action-card {
+    padding: 1.5rem;
+    background-color: var(--color-gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-gray-200);
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  .profile-action-card:hover {
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-3px);
+    border-color: var(--color-gray-300);
+  }
+  
+  .profile-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--color-gray-100);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-action-card:hover .profile-action-icon {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  .profile-action-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-gray-800);
+  }
+  
+  .profile-action-description {
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+    margin-bottom: 0;
+  }
+  
+  /* История бронирований */
+  .booking-history-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .booking-history-table th,
+  .booking-history-table td {
+    padding: 0.875rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+  
+  .booking-history-table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-gray-700);
+    background-color: var(--color-gray-50);
+  }
+  
+  .booking-history-table tr:hover {
+    background-color: var(--color-gray-50);
+  }
+  
+  .booking-history-table .status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+  }
+  
+  .booking-history-table .status-completed {
+    background-color: #d1e7dd;
+    color: #146c43;
+  }
+  
+  .booking-history-table .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .booking-history-table .status-cancelled {
+    background-color: #f8d7da;
+    color: #dc3545;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 1.5rem 0;
+    }
+    
+    .profile-title {
+      font-size: 1.75rem;
+    }
+    
+    .profile-avatar-wrapper {
+      width: 120px;
+      height: 120px;
+    }
+    
+    .booking-history-table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .profile-info-item {
+      flex-direction: column;
+    }
+    
+    .profile-info-icon {
+      margin-bottom: 0.5rem;
+    }
+  }

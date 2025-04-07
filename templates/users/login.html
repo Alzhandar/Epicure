@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход - Epicure{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card fade-in-element">
+        <div class="auth-header">
+            <h2 class="auth-title">Добро пожаловать</h2>
+            <p class="auth-subtitle">Войдите в свой аккаунт</p>
+        </div>
+        
+        <div class="auth-body">
+            <form method="post" class="auth-form" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="phone_number" class="form-label">Номер телефона</label>
+                    <div class="input-group">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" name="phone_number" 
+                               class="form-control input-with-icon {% if form.phone_number.errors %}is-invalid{% endif %}" 
+                               id="phone_number" value="{{ form.phone_number.value|default:'' }}" 
+                               placeholder="+7 (___) ___-__-__" required>
+                        {% if form.phone_number.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Пароль</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" 
+                               class="form-control input-with-icon password-field {% if form.password.errors %}is-invalid{% endif %}" 
+                               id="password" required>
+                        <button type="button" class="password-toggle-btn" aria-label="Показать/скрыть пароль">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" name="remember_me" class="form-check-input" id="remember_me" 
+                               {% if form.remember_me.value %}checked{% endif %}>
+                        <label class="form-check-label" for="remember_me">Запомнить меня</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn">
+                    <span>Войти</span>
+                </button>
+                
+                <div class="text-center mt-3">
+                    <a href="#" class="auth-footer-link">Забыли пароль?</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="auth-footer">
+            <p class="auth-footer-text">Нет аккаунта? <a href="{% url 'register' %}" class="auth-footer-link">Зарегистрируйтесь</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('.password-toggle-btn');
+        const passwordField = document.querySelector('.password-field');
+        
+        if (togglePassword && passwordField) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                if (type === 'password') {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        }
+        
+        const phoneInput = document.getElementById('phone_number');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.startsWith('7') || value.startsWith('8')) {
+                    value = value.substring(1);
+                }
+                
+                if (value) {
+                    if (value.length <= 3) {
+                        value = `+7 (${value}`;
+                    } else if (value.length <= 6) {
+                        value = `+7 (${value.substring(0, 3)}) ${value.substring(3)}`;
+                    } else if (value.length <= 8) {
+                        value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6)}`;
+                    } else {
+                        value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6, 8)}-${value.substring(8, 10)}`;
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
+        
+        const form = document.querySelector('.auth-form');
+        if (form && form.querySelector('.alert-danger')) {
+            form.classList.add('form-shake');
+            setTimeout(() => {
+                form.classList.remove('form-shake');
+            }, 500);
+        }
+    });
+</script>
+{% endblock %}

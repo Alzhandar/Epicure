@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Epicure{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title fade-in-element">Добро пожаловать в Epicure</h1>
+        {% if current_city %}
+            <p class="hero-subtitle fade-in-element animation-delay-1">
+                Откройте для себя изысканные рестораны в городе {{ current_city.name }}
+            </p>
+        {% else %}
+            <p class="hero-subtitle fade-in-element animation-delay-1">
+                Выберите город, чтобы найти идеальный ресторан
+            </p>
+            <div class="text-center mb-4 fade-in-element animation-delay-2">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cityModal">
+                    <i class="fas fa-map-marker-alt me-2"></i> Выбрать город
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if current_city %}
+<section class="restaurants-section">
+    <div class="restaurants-header fade-in-element">
+        <h2 class="restaurants-title">Рестораны в {{ current_city.name }}</h2>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#cityModal">
+            <i class="fas fa-exchange-alt me-1"></i> Изменить город
+        </button>
+    </div>
+    
+    <div class="restaurants-grid">
+        {% for restaurant in restaurants %}
+        <div class="restaurant-card fade-in-element animation-delay-{{ forloop.counter|divisibleby:3|yesno:'3,2,1' }}">
+            <div class="restaurant-card-body">
+                <h3 class="restaurant-card-title">{{ restaurant.name }}</h3>
+                <div class="restaurant-card-info">
+                    <div class="restaurant-card-info-item">
+                        <i class="fas fa-map-marker-alt restaurant-card-info-icon"></i>
+                        <span>{{ restaurant.city.name }}</span>
+                    </div>
+                    
+                    <div class="restaurant-card-info-item">
+                        <i class="fas fa-utensils restaurant-card-info-icon"></i>
+                        <span>Европейская, Азиатская кухня</span>
+                    </div>
+                    <div class="restaurant-card-info-item">
+                        <i class="fas fa-clock restaurant-card-info-icon"></i>
+                        <span>10:00 - 22:00</span>
+                    </div>
+                </div>
+                
+                <div class="restaurant-card-features">
+                    <span class="feature-tag">Wi-Fi</span>
+                    <span class="feature-tag">Парковка</span>
+                    <span class="feature-tag">Доставка</span>
+                </div>
+                
+                <div class="restaurant-card-footer">
+                    <div class="restaurant-rating">
+                        <i class="fas fa-star rating-star"></i>
+                        <span>4.8</span>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                    <a href="#" class="btn btn-sm btn-dark">Забронировать</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state col-12 fade-in-element">
+            <i class="fas fa-utensils empty-state-icon"></i>
+            <h3 class="empty-state-title">В этом городе пока нет ресторанов</h3>
+            <p class="empty-state-subtitle">
+                Попробуйте выбрать другой город или загляните к нам позже. 
+                Мы постоянно расширяем нашу сеть ресторанов.
+            </p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cityModal">
+                <i class="fas fa-map-marker-alt me-2"></i> Выбрать другой город
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<div class="modal fade" id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cityModalLabel">Выберите город</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'set_city' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    
+                    <div class="city-modal-list">
+                        {% for city in cities %}
+                        <label class="city-item {% if current_city.id == city.id %}active{% endif %}">
+                            <input type="radio" name="city_id" value="{{ city.id }}" 
+                                {% if current_city.id == city.id %}checked{% endif %}>
+                            <span>{{ city.name }}</span>
+                        </label>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="mb-0">Нет доступных городов</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" {% if not cities %}disabled{% endif %}>
+                            <i class="fas fa-check me-2"></i> Выбрать
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/modal.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if is_first_visit %}
+        document.body.setAttribute('data-first-visit', '');
+        {% endif %}
+        
+        const fadeElements = document.querySelectorAll('.fade-in-element');
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in-up');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(element => {
+                observer.observe(element);
+            });
+        } else {
+            fadeElements.forEach(element => {
+                element.classList.add('fade-in-up');
+            });
+        }
+    });
+</script>
+{% endblock %}

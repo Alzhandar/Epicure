@@ -23,6 +23,7 @@ from django.views.generic import RedirectView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from users.template_views import home_view
 
 api_info = openapi.Info(
     title="Epicure API",
@@ -52,7 +53,6 @@ urlpatterns = [
     path('api/v1/', include('cities.urls')),
     path('api/v1/', include('users.urls')),
     path('api/v1/', include('restaurant.urls')), 
-    path('', RedirectView.as_view(url='/api/swagger/', permanent=False)),
     
     re_path(r'^api/swagger(?P<format>\.json|\.yaml)$', 
         schema_view.without_ui(cache_timeout=0), 
@@ -63,6 +63,10 @@ urlpatterns = [
     path('api/redoc/', 
         schema_view.with_ui('redoc', cache_timeout=0), 
         name='schema-redoc'),
+
+    # template urls
+    path('', home_view, name='home'),
+    path('accounts/', include('users.template_urls')),
 ]
 
 if settings.DEBUG:

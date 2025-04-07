@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Мой профиль - Epicure{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Мой профиль</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        {% if user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.full_name }}" class="img-fluid rounded-circle" style="max-width: 150px;">
+                        {% else %}
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px; font-size: 48px;">
+                                {{ user.name.0 }}{{ user.last_name.0|default:"" }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h2 class="mb-3">{{ user.full_name }}</h2>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-muted">Номер телефона</h6>
+                            <p>{{ user.phone_number }}</p>
+                        </div>
+                        
+                        {% if user.email %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Email</h6>
+                            <p>{{ user.email }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.city %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Город</h6>
+                            <p>{{ user.city.name }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div>
+                            <h6 class="text-muted">Язык интерфейса</h6>
+                            <p>{{ user.get_language_display }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="#" class="btn btn-outline-dark">Изменить профиль</a>
+                    <a href="#" class="btn btn-outline-danger">Изменить пароль</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">История бронирований</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-center">У вас пока нет истории бронирований</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

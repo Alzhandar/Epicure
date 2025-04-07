@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Epicure{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="{% url 'home' %}">
+                        <img 
+                        src="https://media-hosting.imagekit.io/f08c45bdc3424fb4/photo_2025-04-07%2014.44.17.jpeg?Expires=1838627073&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=xgfDEHuiusjYuxowsawBOgn-ZzfJz9GmINijf4ZJuvYBJZBwoT8keGczFHzE9QMC1AStO6OPTuYGt~-HwdFOzjl9tOOYsLvR7p42Dp48PKrAUyXxOuYVSiYiUD89HVd3M9pBqKMQbpTBax-kqf798V3FaySQBzbSAYupN5Lr~H0tmViUKuUrvd5sBX09kAEhxGEbAmpgq8JrPuR3Ij9jXTuI4oHaLlp0lv1T1L9cuEHV0Tnj6iUYe~HhsIiFFQ1zBc~VgvOdVSxLU~qo6aJA9aCm1F2tDFuyTUxZlCMVCz7AqHTVRQGaHMuR9ci~Voj0Ic6TTufy4EqkBuzezXGZRA__" 
+                        alt="Epicure Logo" 
+                        class="logo"
+                      />                      
+                    </a>
+                </div>
+                <div class="auth-container">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span>{{ user.full_name }}</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user me-2"></i>Профиль
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="auth-buttons">
+                            <a href="{% url 'login' %}" class="btn btn-secondary">Войти</a>
+                            <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade-in">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img 
+                    src="https://media-hosting.imagekit.io/f08c45bdc3424fb4/photo_2025-04-07%2014.44.17.jpeg?Expires=1838627073&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=xgfDEHuiusjYuxowsawBOgn-ZzfJz9GmINijf4ZJuvYBJZBwoT8keGczFHzE9QMC1AStO6OPTuYGt~-HwdFOzjl9tOOYsLvR7p42Dp48PKrAUyXxOuYVSiYiUD89HVd3M9pBqKMQbpTBax-kqf798V3FaySQBzbSAYupN5Lr~H0tmViUKuUrvd5sBX09kAEhxGEbAmpgq8JrPuR3Ij9jXTuI4oHaLlp0lv1T1L9cuEHV0Tnj6iUYe~HhsIiFFQ1zBc~VgvOdVSxLU~qo6aJA9aCm1F2tDFuyTUxZlCMVCz7AqHTVRQGaHMuR9ci~Voj0Ic6TTufy4EqkBuzezXGZRA__" 
+                    alt="Epicure Logo" 
+                    class="logo mb-2"
+                    style="height: 40px;"
+                  />
+                    <p class="footer-text mb-0">&copy; {% now "Y" %} Epicure. Все права защищены.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link me-3">О нас</a>
+                    <a href="#" class="footer-link me-3">Контакты</a>
+                    <a href="#" class="footer-link">Политика конфиденциальности</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ STATIC_URL }}js/main.js"></script>
+    <script src="{{ STATIC_URL }}js/animations.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
