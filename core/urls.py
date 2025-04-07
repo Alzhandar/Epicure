@@ -38,6 +38,7 @@ api_url_patterns = [
     path('api/v1/', include('cities.urls')),
     path('api/v1/', include('users.urls')),
     path('api/v1/', include('restaurant.urls')),
+    path('api/v1/', include('products.urls')),
 ]
 
 schema_view = get_schema_view(
@@ -53,6 +54,7 @@ urlpatterns = [
     path('api/v1/', include('cities.urls')),
     path('api/v1/', include('users.urls')),
     path('api/v1/', include('restaurant.urls')), 
+    path('api/v1/', include('products.urls')),
     
     re_path(r'^api/swagger(?P<format>\.json|\.yaml)$', 
         schema_view.without_ui(cache_timeout=0), 
@@ -67,6 +69,8 @@ urlpatterns = [
     # template urls
     path('', home_view, name='home'),
     path('accounts/', include('users.template_urls')),
+    path('products/', include('products.urls')),
+    
 ]
 
 if settings.DEBUG:

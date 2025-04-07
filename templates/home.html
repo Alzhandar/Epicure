@@ -92,7 +92,6 @@
     </div>
 </section>
 {% endif %}
-<!-- Добавить эту секцию после секции hero и перед секцией restaurants-section -->
 
 <section class="dishes-showcase">
     <div class="section-header fade-in-element">
@@ -110,34 +109,37 @@
     <div class="dishes-carousel-container fade-in-element animation-delay-1">
         <div class="dishes-carousel" id="dishesCarousel">
             {% for item in menu_items %}
-            <div class="dish-card">
-                <div class="dish-image-container">
-                    {% if item.image %}
-                        <img src="{{ item.image.url }}" alt="{{ item.name_ru }}" class="dish-image">
-                    {% else %}
-                        <div class="dish-image-placeholder">
-                            <i class="fas fa-utensils"></i>
-                        </div>
-                    {% endif %}
-                    {% if item.is_healthy %}
-                        <span class="dish-tag healthy-tag">
-                            <i class="fas fa-leaf"></i> ЗОЖ
-                        </span>
-                    {% endif %}
-                </div>
-                <div class="dish-content">
-                    <h3 class="dish-title">{{ item.name_ru }}</h3>
-                    <p class="dish-type">{{ item.menu_type.name|default:"Основное меню" }}</p>
-                    <div class="dish-details">
-                        <div class="dish-price">{{ item.price }} ₸</div>
-                        {% if user.is_authenticated %}
-                        <button class="dish-order-btn" data-dish-id="{{ item.id }}">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        {% endif %}
+        <div class="dish-card dish-modal-trigger" data-dish-id="{{ item.id }}">
+            <div class="dish-image-container">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name_ru }}" class="dish-image">
+                {% else %}
+                    <div class="dish-image-placeholder">
+                        <i class="fas fa-utensils"></i>
                     </div>
+                {% endif %}
+                {% if item.is_healthy %}
+                    <span class="dish-tag healthy-tag">
+                        <i class="fas fa-leaf"></i> ЗОЖ
+                    </span>
+                {% endif %}
+            </div>
+            <div class="dish-content">
+                <h3 class="dish-title">{{ item.name_ru }}</h3>
+                <p class="dish-type">{{ item.menu_type.name|default:"Основное меню" }}</p>
+                <div class="dish-details">
+                    <div class="dish-price">{{ item.price }} ₸</div>
+                    <button class="dish-more-btn" data-dish-id="{{ item.id }}">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    {% if user.is_authenticated %}
+                    <button class="dish-order-btn" data-dish-id="{{ item.id }}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
+        </div>
             {% empty %}
             <div class="empty-dishes">
                 <div class="empty-dishes-message">
@@ -149,6 +151,7 @@
         </div>
     </div>
 </section>
+
 <div class="modal fade" id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -185,12 +188,89 @@
         </div>
     </div>
 </div>
+<div class="modal fade dish-detail-modal" id="dishDetailModal" tabindex="-1" aria-labelledby="dishDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dishDetailModalLabel">Информация о блюде</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body dish-detail-content">
+                <div class="dish-detail-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                    <p>Загрузка информации...</p>
+                </div>
+                
+                <div class="dish-detail-loaded" style="display: none;">
+                    <div class="dish-detail-header">
+                        <div class="dish-detail-image-container">
+                            <img src="" alt="" class="dish-detail-image">
+                        </div>
+                        <div class="dish-detail-main-info">
+                            <h3 class="dish-detail-title"></h3>
+                            <p class="dish-detail-type"></p>
+                            <div class="dish-detail-price-container">
+                                <span class="dish-detail-price"></span>
+                                {% if user.is_authenticated %}
+                                <button class="modal-dish-order-btn">
+                                    <i class="fas fa-plus me-2"></i>В заказ
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dish-detail-description"></div>
+                    
+                    <div class="dish-detail-nutrition">
+                        <h4 class="dish-detail-nutrition-title">Пищевая ценность</h4>
+                        <div class="nutrition-grid">
+                            <div class="nutrition-item">
+                                <div class="nutrition-value calories-value"></div>
+                                <div class="nutrition-label">Калории</div>
+                            </div>
+                            <div class="nutrition-item">
+                                <div class="nutrition-value proteins-value"></div>
+                                <div class="nutrition-label">Белки</div>
+                            </div>
+                            <div class="nutrition-item">
+                                <div class="nutrition-value fats-value"></div>
+                                <div class="nutrition-label">Жиры</div>
+                            </div>
+                            <div class="nutrition-item">
+                                <div class="nutrition-value carbs-value"></div>
+                                <div class="nutrition-label">Углеводы</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dish-detail-restaurant">
+                        <h4 class="dish-detail-restaurant-title">Ресторан</h4>
+                        <p class="dish-detail-restaurant-name"></p>
+                    </div>
+                </div>
+                
+                <div class="dish-detail-error" style="display: none;">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span class="error-message">Произошла ошибка при загрузке информации о блюде.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
 
 {% block extra_js %}
 <script src="{% static 'js/modal.js' %}"></script>
 <script src="{% static 'js/dishes-carousel.js' %}"></script>
+<script src="{% static 'js/dish-detail.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         {% if is_first_visit %}

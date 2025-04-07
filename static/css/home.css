@@ -519,3 +519,194 @@
       background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
     }
   }
+
+.dish-more-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--color-gray-200);
+    color: var(--color-gray-700);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+  }
+  
+  .dish-more-btn:hover {
+    background-color: var(--color-gray-300);
+    color: var(--color-primary);
+  }
+  
+  .dish-modal-trigger {
+    cursor: pointer;
+  }
+  
+  .dish-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-gray-600);
+  }
+  
+  .dish-detail-loading .spinner-border {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+  }
+  
+  .dish-detail-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+  }
+  
+  .dish-detail-image-container {
+    width: 100%;
+    height: 220px;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .dish-detail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .dish-detail-main-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .dish-detail-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+  }
+  
+  .dish-detail-type {
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+    margin-bottom: 1rem;
+  }
+  
+  .dish-detail-price-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  
+  .dish-detail-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+  
+  .modal-dish-order-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+  
+  .modal-dish-order-btn:hover {
+    background-color: var(--color-accent);
+  }
+  
+  .dish-detail-description {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-gray-200);
+    color: var(--color-gray-800);
+    line-height: 1.6;
+    font-size: 0.9375rem;
+  }
+  
+  .dish-detail-nutrition-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+  }
+  
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+  
+  .nutrition-item {
+    text-align: center;
+  }
+  
+  .nutrition-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+  }
+  
+  .nutrition-label {
+    font-size: 0.75rem;
+    color: var(--color-gray-600);
+  }
+  
+  .dish-detail-restaurant-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+  }
+  
+  .dish-detail-restaurant-name {
+    font-size: 0.9375rem;
+    color: var(--color-gray-800);
+  }
+  
+  @media (min-width: 768px) {
+    .dish-detail-header {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
+    
+    .dish-detail-image-container {
+      width: 250px;
+      height: 180px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+    
+    .dish-detail-main-info {
+      flex: 1;
+    }
+  }
+  
+  .dish-detail-modal .modal-content {
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .dish-detail-modal.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+  }
