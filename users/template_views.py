@@ -46,7 +46,6 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f'Аккаунт успешно создан. Добро пожаловать, {user.name}!')
             return redirect('home')
     else:
         form = UserRegistrationForm()
@@ -63,7 +62,6 @@ def login_view(request):
         if form.is_valid():
             user = form.user
             login(request, user)
-            messages.success(request, f'Добро пожаловать, {user.name}!')
             
             if not form.cleaned_data.get('remember_me'):
                 request.session.set_expiry(0)
@@ -77,7 +75,6 @@ def login_view(request):
 @login_required
 def logout_view(request):
     logout(request)
-    messages.success(request, 'Вы успешно вышли из системы.')
     return redirect('home')
 
 @login_required
@@ -89,7 +86,6 @@ def set_city(request):
         city_id = request.POST.get('city_id')
         if city_id:
             request.session['city_id'] = int(city_id)
-            messages.success(request, 'Город успешно выбран')
         
         next_url = request.POST.get('next', 'home')
         return redirect(next_url)

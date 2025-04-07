@@ -25,13 +25,9 @@
                 <div class="auth-container">
                     {% if user.is_authenticated %}
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle">
-                                <i class="fas fa-user-circle me-1"></i>
-                                <span>{{ user.full_name }}</span>
-                            </button>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-user me-2"></i>Профиль
+                                    <i class="fas fa-user me-2"></i>Профиль {{ user.full_name }}
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">
