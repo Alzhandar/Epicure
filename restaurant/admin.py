@@ -12,13 +12,14 @@ from django.db.models import Q
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'display_iiko_status', 'id')
+    list_display = ('name', 'city', 'opening_time', 'closing_time', 'display_iiko_status', 'id')
     list_filter = ('city',)
     search_fields = ('name', 'city__name', 'iiko_organization_id')
     readonly_fields = ('get_created', 'get_modified')
+
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'city')
+            'fields': ('name', 'city', 'opening_time', 'closing_time')
         }),
         ('Интеграция с iiko', {
             'fields': ('iiko_organization_id', 'external_menu_id', 'price_category_id', 'department_id'),
