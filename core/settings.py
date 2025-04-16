@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'restaurant',
     'products',
     'room',
+    'payments',
 
     # libs
     'rest_framework',

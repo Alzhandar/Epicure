@@ -19,6 +19,12 @@ __pycache__/
 .Python
 *$py.class
 
+**/migrations/
+
 media/
 # static/
 staticfiles/
+
+.idea/
+*.iml
+*.sublime-project
