@@ -46,10 +46,15 @@ class Menu(models.Model):
         blank=True,
         verbose_name='Изображение блюда'
     )
-    description = models.TextField(
+    description_ru = models.TextField(
         null=True,
         blank=True,
-        verbose_name='Описание блюда'
+        verbose_name='Описание блюда (Русский)'
+    )
+    description_kz = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Описание блюда (Казахский)'
     )
     calories = models.PositiveIntegerField(
         null=True,

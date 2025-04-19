@@ -23,7 +23,7 @@ class MenuAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at') 
     fieldsets = (
         (None, {
-            'fields': ('restaurant', 'menu_type', 'name_ru', 'name_kz', 'image', 'description')
+            'fields': ('restaurant', 'menu_type', 'name_ru', 'name_kz', 'image', 'description_ru', 'description_kz')
         }),
         ('Дополнительная информация', {
             'fields': ('calories', 'proteins', 'fats', 'price', 'is_available')
