@@ -710,3 +710,140 @@
     transform: translateY(0);
     opacity: 1;
   }
+  /* Banner styles */
+.banner-container {
+  display: flex;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 2rem;
+  align-items: center;
+  min-height: 200px;
+}
+
+.banner-light {
+  background-color: var(--color-gray-50);
+  color: var(--color-text);
+}
+
+.banner-dark {
+  background-color: var(--color-text);
+  color: var(--color-gray-50);
+}
+
+.banner-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.banner-accent {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.banner-content {
+  flex: 1;
+  padding-right: 2rem;
+  z-index: 1;
+}
+
+.banner-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.banner-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.banner-text {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.banner-action {
+  margin-top: 1rem;
+}
+
+.banner-image-container {
+  flex: 0 0 40%;
+  max-width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner-image {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.section-banner {
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-banner-content {
+  flex: 1;
+}
+
+.section-banner-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.section-banner-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .banner-container {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  
+  .banner-content {
+    padding-right: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .banner-image-container {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .banner-image {
+    max-height: 150px;
+  }
+  
+  .banner-title {
+    font-size: 1.5rem;
+  }
+  
+  .banner-subtitle {
+    font-size: 1rem;
+  }
+  
+  .section-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .section-banner .btn {
+    margin-top: 1rem;
+  }
+}
