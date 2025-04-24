@@ -194,6 +194,8 @@ SWAGGER_SETTINGS = {
         'drf_yasg.inspectors.DictFieldInspector',
         'drf_yasg.inspectors.SimpleFieldInspector',
         'drf_yasg.inspectors.StringDefaultFieldInspector',
+
+        
     ],
     'DEFAULT_FILTER_INSPECTORS': [
         'drf_yasg.inspectors.CoreAPICompatInspector',
