@@ -5,7 +5,7 @@ from .views import banner_click, banner_impression, BannerViewSet
 app_name = 'advertisement'
 
 router = DefaultRouter()
-router.register('banners', BannerViewSet, basename='banner-api')
+router.register('banners', BannerViewSet)
 
 urlpatterns = [
     path('', include((router.urls, app_name), namespace='api')),
