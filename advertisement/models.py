@@ -34,16 +34,16 @@ class Banner(models.Model):
     subtitle = models.CharField(max_length=300, blank=True, null=True, verbose_name='Подзаголовок')
     content = models.TextField(blank=True, null=True, verbose_name='Содержание')
     image = models.ImageField(upload_to=banner_image_path, verbose_name='Изображение', 
-                             help_text='Рекомендуемый размер: 1200x400 пикселей')
+                             help_text='размер: 1200x400 пикселей')
     
     url = models.URLField(verbose_name='URL ссылки', blank=True, null=True, 
                          help_text='Внешняя ссылка или путь внутри сайта')
     button_text = models.CharField(max_length=50, blank=True, null=True, verbose_name='Текст кнопки',
-                                 help_text='Оставьте пустым, если кнопка не нужна')
+                                 help_text='если кнопка не нужна')
     
     start_date = models.DateTimeField(default=timezone.now, verbose_name='Дата начала показа')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name='Дата окончания показа',
-                                  help_text='Оставьте пустым для бессрочного показа')
+                                  help_text='бессрочного показа')
     
     priority = models.IntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(10)],
                                  verbose_name='Приоритет', 

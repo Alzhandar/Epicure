@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
 from django.urls import reverse
-from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models import F, ExpressionWrapper, FloatField, Q
 from .models import Banner
 
 
@@ -26,7 +26,7 @@ class BannerStatusFilter(admin.SimpleListFilter):
                 is_active=True,
                 start_date__lte=now
             ).filter(
-                models.Q(end_date__gte=now) | models.Q(end_date__isnull=True)
+                Q(end_date__gte=now) | Q(end_date__isnull=True)
             )
             
         if self.value() == 'scheduled':
@@ -115,11 +115,13 @@ class BannerAdmin(admin.ModelAdmin):
         return f"С {start} (бессрочно)"
     
     def ctr_display(self, obj):
-        ctr = obj.ctr
-        
+        # Исправление ошибки с форматированием SafeString
         if obj.impressions == 0:
             return "Нет данных"
             
+        # Преобразуем значение в число перед форматированием
+        ctr = float(obj.ctr)
+        
         if ctr > 5:
             color = "green"
         elif ctr > 2:
@@ -127,7 +129,10 @@ class BannerAdmin(admin.ModelAdmin):
         else:
             color = "red"
             
-        return format_html('<span style="color: {}; font-weight: bold">{:.2f}%</span>', color, ctr)
+        # Сначала форматируем число, затем передаем в format_html
+        formatted_ctr = f"{ctr:.2f}%"
+        return format_html('<span style="color: {}; font-weight: bold">{}</span>', 
+                          color, formatted_ctr)
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -146,8 +151,3 @@ class BannerAdmin(admin.ModelAdmin):
     display_period.short_description = 'Период показа'
     ctr_display.short_description = 'CTR'
     
-    class Media:
-        css = {
-            'all': ('admin/css/admin_banners.css',)
-        }
-        js = ('admin/js/banner_admin.js',)

@@ -7,16 +7,9 @@ from .models import Menu
 logger = logging.getLogger(__name__)
 
 def get_dish_details(request, dish_id):
-    """
-    API endpoint для получения детальной информации о блюде по ID.
-    Возвращает детали блюда в формате JSON, включая информацию о
-    ресторане, пищевой ценности и доступности.
-    """
     try:
-        # Получение блюда с предзагрузкой связанных объектов
         dish = get_object_or_404(Menu.objects.select_related('restaurant', 'menu_type'), id=dish_id)
         
-        # Безопасное получение связанных данных
         restaurant_data = {'id': None, 'name': 'Не указан'}
         if dish.restaurant:
             restaurant_data = {
@@ -24,7 +17,6 @@ def get_dish_details(request, dish_id):
                 'name': dish.restaurant.name,
             }
             
-        # Безопасное получение URL изображения
         image_url = None
         if dish.image:
             try:
@@ -32,7 +24,6 @@ def get_dish_details(request, dish_id):
             except Exception as e:
                 logger.warning(f"Не удалось получить URL изображения для блюда {dish_id}: {e}")
         
-        # Формирование ответа с безопасными проверками
         data = {
             'id': dish.id,
             'name': dish.name_ru,
@@ -49,7 +40,6 @@ def get_dish_details(request, dish_id):
             },
         }
         
-        # Безопасный вызов методов
         try:
             data['is_healthy'] = dish.is_healthy()
         except Exception as e:
@@ -60,7 +50,5 @@ def get_dish_details(request, dish_id):
         
         return JsonResponse(data)
     except Exception as e:
-        # Подробное логирование ошибки для отладки
         logger.error(f"Ошибка при получении данных о блюде {dish_id}: {e}", exc_info=True)
-        # Клиенту возвращаем только общее сообщение об ошибке
         return JsonResponse({'error': 'Произошла ошибка при получении данных о блюде'}, status=500)
