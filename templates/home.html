@@ -8,6 +8,43 @@
 {% endblock %}
 
 {% block content %}
+{% if hero_banners %}
+    {% with banner=hero_banners.0 %}
+    <section class="hero">
+        <div class="banner-container banner-{{ banner.color_scheme }}">
+            <div class="banner-content fade-in-element">
+                <h1 class="banner-title">{{ banner.title }}</h1>
+                {% if banner.subtitle %}
+                    <h2 class="banner-subtitle fade-in-element animation-delay-1">{{ banner.subtitle }}</h2>
+                {% endif %}
+                {% if banner.content %}
+                    <div class="banner-text fade-in-element animation-delay-2">{{ banner.content|safe }}</div>
+                {% endif %}
+                {% if banner.button_text %}
+                    <div class="banner-action fade-in-element animation-delay-3">
+                        <a href="{% url 'advertisement:banner_click' banner.id %}" class="btn btn-light">{{ banner.button_text }}</a>
+                    </div>
+                {% endif %}
+            </div>
+            {% if banner.image %}
+            <div class="banner-image-container">
+                <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="banner-image fade-in-element animation-delay-2">
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("{% url 'advertisement:banner_impression' banner.id %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        });
+    </script>
+    {% endwith %}
+{% else %}
 <section class="hero">
     <div class="hero-content">
         <h1 class="hero-title fade-in-element">Добро пожаловать в Epicure</h1>
@@ -27,8 +64,34 @@
         {% endif %}
     </div>
 </section>
+{% endif %}
 
 {% if current_city %}
+{% if restaurant_banners %}
+    {% with banner=restaurant_banners.0 %}
+    <div class="section-banner banner-{{ banner.color_scheme }} fade-in-element">
+        <div class="section-banner-content">
+            <h3 class="section-banner-title">{{ banner.title }}</h3>
+            {% if banner.subtitle %}
+                <p class="section-banner-subtitle">{{ banner.subtitle }}</p>
+            {% endif %}
+        </div>
+        {% if banner.button_text %}
+            <a href="{% url 'advertisement:banner_click' banner.id %}" class="btn btn-sm btn-outline-light">
+                {{ banner.button_text }}
+            </a>
+        {% endif %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("{% url 'advertisement:banner_impression' banner.id %}", {
+                method: 'POST'
+            });
+        });
+    </script>
+    {% endwith %}
+{% endif %}
+
 <section class="restaurants-section">
     <div class="restaurants-header fade-in-element">
         <h2 class="restaurants-title">Рестораны в {{ current_city.name }}</h2>
@@ -93,6 +156,31 @@
 </section>
 {% endif %}
 
+{% if dish_banners %}
+    {% with banner=dish_banners.0 %}
+    <div class="section-banner banner-{{ banner.color_scheme }} fade-in-element">
+        <div class="section-banner-content">
+            <h3 class="section-banner-title">{{ banner.title }}</h3>
+            {% if banner.subtitle %}
+                <p class="section-banner-subtitle">{{ banner.subtitle }}</p>
+            {% endif %}
+        </div>
+        {% if banner.button_text %}
+            <a href="{% url 'advertisement:banner_click' banner.id %}" class="btn btn-sm btn-outline-light">
+                {{ banner.button_text }}
+            </a>
+        {% endif %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("{% url 'advertisement:banner_impression' banner.id %}", {
+                method: 'POST'
+            });
+        });
+    </script>
+    {% endwith %}
+{% endif %}
+
 <section class="dishes-showcase">
     <div class="section-header fade-in-element">
         <h2 class="section-title">Популярные блюда</h2>
@@ -109,37 +197,37 @@
     <div class="dishes-carousel-container fade-in-element animation-delay-1">
         <div class="dishes-carousel" id="dishesCarousel">
             {% for item in menu_items %}
-        <div class="dish-card dish-modal-trigger" data-dish-id="{{ item.id }}">
-            <div class="dish-image-container">
-                {% if item.image %}
-                    <img src="{{ item.image.url }}" alt="{{ item.name_ru }}" class="dish-image">
-                {% else %}
-                    <div class="dish-image-placeholder">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                {% endif %}
-                {% if item.is_healthy %}
-                    <span class="dish-tag healthy-tag">
-                        <i class="fas fa-leaf"></i> ЗОЖ
-                    </span>
-                {% endif %}
-            </div>
-            <div class="dish-content">
-                <h3 class="dish-title">{{ item.name_ru }}</h3>
-                <p class="dish-type">{{ item.menu_type.name|default:"Основное меню" }}</p>
-                <div class="dish-details">
-                    <div class="dish-price">{{ item.price }} ₸</div>
-                    <button class="dish-more-btn" data-dish-id="{{ item.id }}">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                    {% if user.is_authenticated %}
-                    <button class="dish-order-btn" data-dish-id="{{ item.id }}">
-                        <i class="fas fa-plus"></i>
-                    </button>
+            <div class="dish-card dish-modal-trigger" data-dish-id="{{ item.id }}">
+                <div class="dish-image-container">
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name_ru }}" class="dish-image">
+                    {% else %}
+                        <div class="dish-image-placeholder">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                    {% endif %}
+                    {% if item.is_healthy %}
+                        <span class="dish-tag healthy-tag">
+                            <i class="fas fa-leaf"></i> ЗОЖ
+                        </span>
                     {% endif %}
                 </div>
+                <div class="dish-content">
+                    <h3 class="dish-title">{{ item.name_ru }}</h3>
+                    <p class="dish-type">{{ item.menu_type.name|default:"Основное меню" }}</p>
+                    <div class="dish-details">
+                        <div class="dish-price">{{ item.price }} ₸</div>
+                        <button class="dish-more-btn" data-dish-id="{{ item.id }}">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        {% if user.is_authenticated %}
+                        <button class="dish-order-btn" data-dish-id="{{ item.id }}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
             {% empty %}
             <div class="empty-dishes">
                 <div class="empty-dishes-message">
@@ -188,6 +276,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade dish-detail-modal" id="dishDetailModal" tabindex="-1" aria-labelledby="dishDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -267,14 +356,11 @@
 </div>
 {% endblock %}
 
-<!-- Обновите блок extra_js в конце файла -->
-
 {% block extra_js %}
 <script src="{% static 'js/dishes-carousel.js' %}"></script>
 <script src="{% static 'js/dish-detail.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Первое посещение - показываем модальное окно выбора города
         {% if is_first_visit %}
         document.body.setAttribute('data-first-visit', '');
         const cityModal = document.getElementById('cityModal');
@@ -284,7 +370,6 @@
         }
         {% endif %}
         
-        // Анимация элементов при прокрутке
         const fadeElements = document.querySelectorAll('.fade-in-element');
         if ('IntersectionObserver' in window) {
             const observer = new IntersectionObserver((entries) => {

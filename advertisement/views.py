@@ -55,3 +55,4 @@ def get_banners_for_homepage(request):
     }
     
     return context
+

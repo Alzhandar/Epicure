@@ -8,7 +8,8 @@ from .forms import UserRegistrationForm, UserLoginForm
 from products.models import Menu
 from restaurant.models import Restaurant
 from cities.models import City
-
+from advertisement.views import get_banners_for_homepage
+    
 User = get_user_model()
 
 def home_view(request):
@@ -33,8 +34,12 @@ def home_view(request):
         'menu_items': menu_items,
     }
 
+    banner_context = get_banners_for_homepage(request)
+    context.update(banner_context)
+    
+    print("Баннеры для главной страницы:", banner_context)  
+    
     return render(request, 'home.html', context)
-
 
 def register_view(request):
     if request.user.is_authenticated:

@@ -72,7 +72,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('accounts/', include('users.template_urls')),
     path('products/', include('products.urls')),
-    
+    path('advertisement/', include('advertisement.urls', namespace='advertisement')),
 ]
 
 if settings.DEBUG:
