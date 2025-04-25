@@ -1,131 +1,80 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import RoomType, BookingType, Room, RoomImage, Package, PackageMenu, Booking
+from .models import Reservation, ReservationMenuItem, ReservationStatus
 
 
-@admin.register(RoomType)
-class RoomTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
-
-
-@admin.register(BookingType)
-class BookingTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
-
-
-class RoomImageInline(admin.TabularInline):
-    model = RoomImage
+class ReservationMenuItemInline(admin.TabularInline):
+    model = ReservationMenuItem
     extra = 1
-    fields = ('image', 'is_main', 'image_preview')
-    readonly_fields = ('image_preview',)
-    
-    def image_preview(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" width="150" height="100" />', obj.image.url)
-        return "Нет изображения"
-    
-    image_preview.short_description = 'Превью изображения'
+    autocomplete_fields = ['menu_item']
 
 
-@admin.register(Room)
-class RoomAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'restaurant', 'section', 'room_type', 'capacity', 
-                   'price_per_hour', 'is_active')
-    list_filter = ('restaurant', 'room_type', 'is_active')
-    search_fields = ('name', 'restaurant__name', 'section__name')
-    inlines = [RoomImageInline]
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = [
+        'id', 'guest_name', 'guest_phone', 'restaurant_name', 'table_number',
+        'reservation_date_display', 'time_slot', 'guest_count', 'status_colored', 'created_at'
+    ]
+    list_filter = ['status', 'reservation_date', 'restaurant']
+    search_fields = ['guest_name', 'guest_phone', 'guest_email', 'restaurant__name']
+    autocomplete_fields = ['restaurant', 'table']
+    readonly_fields = ['created_at', 'updated_at']
+    inlines = [ReservationMenuItemInline]
+    date_hierarchy = 'reservation_date'
     fieldsets = (
-        (None, {
-            'fields': ('name', 'restaurant', 'section', 'room_type')
-        }),
-        ('Характеристики комнаты', {
-            'fields': ('capacity', 'area', 'price_per_hour', 'description', 'features', 'is_active')
-        }),
-        ('Временные метки', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    readonly_fields = ('created_at', 'updated_at')
-
-
-class PackageMenuInline(admin.TabularInline):
-    model = PackageMenu
-    extra = 1
-    fields = ('menu_item', 'quantity', 'notes')
-    autocomplete_fields = ('menu_item',)
-
-
-@admin.register(Package)
-class PackageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'room', 'booking_type', 'price', 'min_guests', 
-                   'max_guests', 'is_active')
-    list_filter = ('room__restaurant', 'booking_type', 'is_active')
-    search_fields = ('name', 'room__name', 'room__restaurant__name')
-    inlines = [PackageMenuInline]
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'room', 'booking_type')
-        }),
-        ('Информация о пакете', {
-            'fields': ('description', 'price', 'min_guests', 'max_guests', 'is_active')
-        }),
-        ('Временные метки', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    readonly_fields = ('created_at', 'updated_at')
-    autocomplete_fields = ('room',)
-
-
-@admin.register(PackageMenu)
-class PackageMenuAdmin(admin.ModelAdmin):
-    list_display = ('id', 'package', 'menu_item', 'quantity')
-    list_filter = ('package__room__restaurant', 'package')
-    search_fields = ('package__name', 'menu_item__name_ru')
-    autocomplete_fields = ('package', 'menu_item')
-
-
-@admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'room', 'booking_type', 'client_name', 'client_phone',
-                   'date', 'start_time', 'end_time', 'status', 'total_price')
-    list_filter = ('room__restaurant', 'booking_type', 'date', 'status')
-    search_fields = ('client_name', 'client_phone', 'room__name', 'room__restaurant__name')
-    fieldsets = (
-        (None, {
-            'fields': ('room', 'package', 'booking_type'),
+        ('Информация о бронировании', {
+            'fields': ('restaurant', 'table', 'reservation_date', 'start_time', 'end_time', 'guest_count')
         }),
         ('Информация о клиенте', {
-            'fields': ('client_name', 'client_phone', 'client_email'),
+            'fields': ('guest_name', 'guest_phone', 'guest_email')
         }),
-        ('Детали бронирования', {
-            'fields': ('date', 'start_time', 'end_time', 'guests_count', 'special_requests'),
+        ('Статус и комментарии', {
+            'fields': ('status', 'special_requests')
         }),
-        ('Статус и оплата', {
-            'fields': ('status', 'total_price', 'deposit'),
-        }),
-        ('Временные метки', {
+        ('Служебная информация', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
-    readonly_fields = ('created_at', 'updated_at')
-    autocomplete_fields = ('room', 'package')
     
-    def save_model(self, request, obj, form, change):
-        if not obj.id:
-            if obj.package:
-                obj.total_price = obj.package.price
-            else:
-                from datetime import datetime
-                time_diff = (
-                    datetime.combine(obj.date, obj.end_time) - 
-                    datetime.combine(obj.date, obj.start_time)
-                ).seconds / 3600
-                obj.total_price = obj.room.price_per_hour * time_diff
-        
-        super().save_model(request, obj, form, change)
+    def restaurant_name(self, obj):
+        return obj.restaurant.name
+    restaurant_name.short_description = 'Ресторан'
+    restaurant_name.admin_order_field = 'restaurant__name'
+    
+    def table_number(self, obj):
+        return f'№{obj.table.number}'
+    table_number.short_description = 'Стол'
+    table_number.admin_order_field = 'table__number'
+    
+    def reservation_date_display(self, obj):
+        return obj.reservation_date.strftime('%d.%m.%Y')
+    reservation_date_display.short_description = 'Дата'
+    reservation_date_display.admin_order_field = 'reservation_date'
+    
+    def time_slot(self, obj):
+        return f'{obj.start_time.strftime("%H:%M")} - {obj.end_time.strftime("%H:%M")}'
+    time_slot.short_description = 'Время'
+    
+    def status_colored(self, obj):
+        colors = {
+            ReservationStatus.PENDING: '#f4ca16',    
+            ReservationStatus.CONFIRMED: '#4caf50',  
+            ReservationStatus.CANCELLED: '#f44336',  
+            ReservationStatus.COMPLETED: '#2196f3', 
+            ReservationStatus.NO_SHOW: '#9c27b0',    
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 8px; border-radius: 5px;">{}</span>',
+            colors.get(obj.status, '#777777'),
+            obj.get_status_display()
+        )
+    status_colored.short_description = 'Статус'
+
+
+@admin.register(ReservationMenuItem)
+class ReservationMenuItemAdmin(admin.ModelAdmin):
+    list_display = ['reservation', 'menu_item', 'quantity']
+    list_filter = ['reservation__status', 'reservation__restaurant']
+    search_fields = ['reservation__guest_name', 'menu_item__name_ru']
+    autocomplete_fields = ['reservation', 'menu_item']

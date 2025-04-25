@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Бронирование столика - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Бронирование столика</h2>
+                </div>
+                <div class="card-body">
+                    <form id="reservation-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="restaurant" class="form-label">Выберите ресторан *</label>
+                                <select id="restaurant" class="form-select" required>
+                                    <option value="">Выберите ресторан</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="reservation_date" class="form-label">Дата бронирования *</label>
+                                <input type="date" id="reservation_date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="section" class="form-label">Секция ресторана *</label>
+                                <select id="section" class="form-select" required>
+                                    <option value="">Сначала выберите ресторан</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="table" class="form-label">Столик *</label>
+                                <select id="table" class="form-select" required>
+                                    <option value="">Сначала выберите секцию</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="time_slot" class="form-label">Время *</label>
+                                <select id="time_slot" class="form-select" required>
+                                    <option value="">Сначала выберите дату и стол</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="guest_count" class="form-label">Количество гостей *</label>
+                                <input type="number" id="guest_count" class="form-control" min="1" max="20" value="2" required>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mb-3 mt-4">Контактная информация</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="guest_name" class="form-label">Ваше имя *</label>
+                                <input type="text" id="guest_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="guest_phone" class="form-label">Телефон *</label>
+                                <input type="tel" id="guest_phone" class="form-control" required 
+                                       placeholder="+7 (___) ___-__-__">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="guest_email" class="form-label">Email</label>
+                            <input type="email" id="guest_email" class="form-control" 
+                                   placeholder="example@mail.com">
+                            <div class="form-text">На этот адрес будет отправлено подтверждение бронирования</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="special_requests" class="form-label">Особые пожелания</label>
+                            <textarea id="special_requests" class="form-control" rows="3"></textarea>
+                            <div class="form-text">Укажите любые особые предпочтения или пожелания</div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                Я согласен с <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">правилами бронирования</a> *
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Забронировать</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с правилами бронирования -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Правила бронирования</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Правила бронирования столиков в ресторане:</h6>
+                <ol>
+                    <li>Бронирование стола действительно в течение 15 минут после указанного времени.</li>
+                    <li>Отмена бронирования возможна не позднее чем за 2 часа до забронированного времени.</li>
+                    <li>При неявке и отсутствии отмены бронирования, ресторан оставляет за собой право отказать в последующих бронированиях.</li>
+                    <li>Бронирование стола производится максимум на 3 часа.</li>
+                    <li>При опоздании более чем на 15 минут, бронь может быть отменена.</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Я согласен</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Шаблон для отображения информации о бронировании -->
+<div class="modal fade" id="reservationSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Бронирование успешно создано!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="reservation-details">
+                    <p>Номер бронирования: <strong id="reservation-id"></strong></p>
+                    <p>Ресторан: <strong id="reservation-restaurant"></strong></p>
+                    <p>Дата: <strong id="reservation-date"></strong></p>
+                    <p>Время: <strong id="reservation-time"></strong></p>
+                    <p>Количество гостей: <strong id="reservation-guests"></strong></p>
+                </div>
+                <div class="alert alert-info">
+                    <p>Пожалуйста, сохраните данную информацию. На указанный email будет отправлено подтверждение бронирования.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'home' %}" class="btn btn-secondary">На главную</a>
+                <a href="{% url 'check_reservation' %}" class="btn btn-primary">Проверить статус</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/reservation.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reservationService = new ReservationService();
+        const formController = new ReservationFormController('reservation-form', reservationService);
+        
+        // Инициализация маски для телефона
+        const phoneInput = document.getElementById('guest_phone');
+        if (phoneInput) {
+            // Простая маска для телефона (можно использовать библиотеки вроде IMask или Inputmask для более сложных масок)
+            phoneInput.addEventListener('input', function(e) {
+                let x = e.target.value.replace(/\D/g, '')
+                    .match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                if (x[1] != '') {
+                    x[1] = '+' + x[1];
+                }
+                e.target.value = !x[2] ? x[1] : x[1] + ' (' + x[2] + ') ' + (x[3] ? x[3] + '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+            });
+        }
+        
+        // Обработчик успешного бронирования
+        window.reservationSuccess = function(reservationData) {
+            // Заполняем данные в модальном окне
+            document.getElementById('reservation-id').textContent = reservationData.id;
+            document.getElementById('reservation-restaurant').textContent = reservationData.restaurant_details.name;
+            document.getElementById('reservation-date').textContent = new Date(reservationData.reservation_date).toLocaleDateString();
+            document.getElementById('reservation-time').textContent = `${reservationData.start_time.substring(0, 5)} - ${reservationData.end_time.substring(0, 5)}`;
+            document.getElementById('reservation-guests').textContent = reservationData.guest_count;
+            
+            // Показываем модальное окно
+            const modal = new bootstrap.Modal(document.getElementById('reservationSuccessModal'));
+            modal.show();
+        };
+    });
+</script>
+{% endblock %}

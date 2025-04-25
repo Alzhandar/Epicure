@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Проверка бронирования - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Проверка статуса бронирования</h2>
+                </div>
+                <div class="card-body">
+                    <form id="check-reservation-form" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="search-phone" class="form-label">Телефон</label>
+                                <input type="tel" id="search-phone" class="form-control" placeholder="+7 (___) ___-__-__">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="search-email" class="form-label">Email</label>
+                                <input type="email" id="search-email" class="form-control" placeholder="example@mail.com">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-text mb-2">Для проверки статуса бронирования укажите телефон или email, указанный при бронировании</div>
+                                <button type="submit" class="btn btn-primary">Проверить</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div id="reservations-container" class="d-none">
+                        <h3 class="mb-3">Ваши бронирования</h3>
+                        <div id="reservations-list" class="list-group"></div>
+                    </div>
+                    
+                    <div id="no-reservations" class="alert alert-info d-none">
+                        По вашему запросу не найдено активных бронирований. Проверьте указанные контактные данные или создайте новое бронирование.
+                    </div>
+                    
+                    <div id="error-message" class="alert alert-danger d-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с деталями бронирования -->
+<div class="modal fade" id="reservationDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Детали бронирования</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="reservation-details-body">
+                <!-- Контент будет заполнен динамически -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" id="cancel-reservation-btn" class="btn btn-danger d-none">Отменить бронирование</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/reservation.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reservationService = new ReservationService();
+        const checkForm = document.getElementById('check-reservation-form');
+        const reservationsContainer = document.getElementById('reservations-container');
+        const reservationsList = document.getElementById('reservations-list');
+        const noReservations = document.getElementById('no-reservations');
+        const errorMessage = document.getElementById('error-message');
+        const reservationDetailsModal = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
+        const reservationDetailsBody = document.getElementById('reservation-details-body');
+        const cancelReservationBtn = document.getElementById('cancel-reservation-btn');
+        
+        const phoneInput = document.getElementById('search-phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let x = e.target.value.replace(/\D/g, '')
+                    .match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                if (x[1] != '') {
+                    x[1] = '+' + x[1];
+                }
+                e.target.value = !x[2] ? x[1] : x[1] + ' (' + x[2] + ') ' + (x[3] ? x[3] + '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+            });
+        }
+        
+        checkForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('search-phone').value;
+            const email = document.getElementById('search-email').value;
+            
+            if (!phone && !email) {
+                showError('Пожалуйста, укажите телефон или email для поиска бронирований');
+                return;
+            }
+            
+            hideMessages();
+            
+            try {
+                const params = {};
+                if (phone) params.phone = phone;
+                if (email) params.email = email;
+                
+                const reservations = await reservationService.getMyReservations(params);
+                
+                if (reservations.length === 0) {
+                    noReservations.classList.remove('d-none');
+                    reservationsContainer.classList.add('d-none');
+                    return;
+                }
+                
+                reservationsList.innerHTML = '';
+                reservations.forEach(reservation => {
+                    const date = new Date(reservation.reservation_date).toLocaleDateString();
+                    const time = `${reservation.start_time.substring(0, 5)} - ${reservation.end_time.substring(0, 5)}`;
+                    
+                    const statusClasses = {
+                        'pending': 'bg-warning',
+                        'confirmed': 'bg-success',
+                        'cancelled': 'bg-danger',
+                        'completed': 'bg-info',
+                        'no_show': 'bg-secondary'
+                    };
+                    
+                    const listItem = document.createElement('div');
+                    listItem.className = `list-group-item list-group-item-action`;
+                    listItem.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${reservation.restaurant_details.name}</h5>
+                            <span class="badge ${statusClasses[reservation.status] || 'bg-secondary'}">${reservation.status_display}</span>
+                        </div>
+                        <p class="mb-1">Дата: ${date}, Время: ${time}</p>
+                        <p class="mb-1">Стол: ${reservation.table_details.number}, Гостей: ${reservation.guest_count}</p>
+                        <small>Бронирование №${reservation.id}</small>
+                    `;
+                    
+                    // Добавляем обработчик для показа подробной информации
+                    listItem.addEventListener('click', () => {
+                        showReservationDetails(reservation);
+                    });
+                    
+                    reservationsList.appendChild(listItem);
+                });
+                
+                reservationsContainer.classList.remove('d-none');
+                noReservations.classList.add('d-none');
+            } catch (error) {
+                console.error('Ошибка при получении бронирований:', error);
+                showError('Произошла ошибка при получении данных о бронированиях');
+            }
+        });
+        
+        function showReservationDetails(reservation) {
+            const date = new Date(reservation.reservation_date).toLocaleDateString();
+            const time = `${reservation.start_time.substring(0, 5)} - ${reservation.end_time.substring(0, 5)}`;
+            
+            const statusBadgeClass = {
+                'pending': 'bg-warning',
+                'confirmed': 'bg-success',
+                'cancelled': 'bg-danger',
+                'completed': 'bg-info',
+                'no_show': 'bg-secondary'
+            }[reservation.status] || 'bg-secondary';
+            
+            let menuItemsHtml = '';
+            if (reservation.menu_items && reservation.menu_items.length > 0) {
+                menuItemsHtml = `
+                    <div class="mt-3">
+                        <h6>Предзаказ блюд:</h6>
+                        <ul class="list-group">
+                            ${reservation.menu_items.map(item => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${item.menu_item_details.name_ru}
+                                    <span class="badge bg-primary rounded-pill">${item.quantity} шт.</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            reservationDetailsBody.innerHTML = `
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Бронирование №${reservation.id}</h5>
+                        <span class="badge ${statusBadgeClass}">${reservation.status_display}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Ресторан:</strong> ${reservation.restaurant_details.name}</p>
+                                <p><strong>Дата:</strong> ${date}</p>
+                                <p><strong>Время:</strong> ${time}</p>
+                                <p><strong>Стол:</strong> №${reservation.table_details.number}</p>
+                                <p><strong>Количество гостей:</strong> ${reservation.guest_count}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Имя:</strong> ${reservation.guest_name}</p>
+                                <p><strong>Телефон:</strong> ${reservation.guest_phone}</p>
+                                <p><strong>Email:</strong> ${reservation.guest_email || '-'}</p>
+                                <p><strong>Создано:</strong> ${new Date(reservation.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        
+                        ${reservation.special_requests ? `
+                            <div class="mt-2">
+                                <h6>Особые пожелания:</h6>
+                                <p class="border p-2 bg-light">${reservation.special_requests}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${menuItemsHtml}
+                    </div>
+                </div>
+            `;
+            
+            if (['pending', 'confirmed'].includes(reservation.status)) {
+                cancelReservationBtn.classList.remove('d-none');
+                
+                cancelReservationBtn.onclick = async function() {
+                    if (confirm(`Вы уверены, что хотите отменить бронирование №${reservation.id}?`)) {
+                        try {
+                            await reservationService.cancelReservation(reservation.id);
+                            reservationDetailsModal.hide();
+                            
+                            checkForm.dispatchEvent(new Event('submit'));
+                            
+                            alert('Бронирование успешно отменено!');
+                        } catch (error) {
+                            console.error('Ошибка при отмене бронирования:', error);
+                            alert('Произошла ошибка при отмене бронирования');
+                        }
+                    }
+                };
+            } else {
+                cancelReservationBtn.classList.add('d-none');
+            }
+            
+            reservationDetailsModal.show();
+        }
+        
+        function showError(message) {
+            errorMessage.innerHTML = message;
+            errorMessage.classList.remove('d-none');
+            reservationsContainer.classList.add('d-none');
+            noReservations.classList.add('d-none');
+        }
+        
+        function hideMessages() {
+            errorMessage.classList.add('d-none');
+            reservationsContainer.classList.add('d-none');
+            noReservations.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,301 +1,35 @@
 from django.db import models
-from django.core.validators import MinValueValidator
-from restaurant.models import Restaurant, Section
+from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
+
+from restaurant.models import Restaurant, Section, Table
 from products.models import Menu
 
 
-class RoomType(models.Model):
-    name = models.CharField(
-        max_length=100,
-        unique=True,
-        verbose_name='Название типа комнаты'
-    )
-    description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Описание типа комнаты'
-    )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Тип комнаты'
-        verbose_name_plural = 'Типы комнат'
-        ordering = ['name']
+class ReservationStatus(models.TextChoices):
+    PENDING = 'pending', 'Ожидает подтверждения'
+    CONFIRMED = 'confirmed', 'Подтверждено'
+    CANCELLED = 'cancelled', 'Отменено'
+    COMPLETED = 'completed', 'Завершено'
+    NO_SHOW = 'no_show', 'Неявка'
 
 
-class BookingType(models.Model):
-    name = models.CharField(
-        max_length=100,
-        unique=True,
-        verbose_name='Тип бронирования'
-    )
-    description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Описание типа бронирования'
-    )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Тип бронирования'
-        verbose_name_plural = 'Типы бронирования'
-        ordering = ['name']
-
-
-class Room(models.Model):
-    name = models.CharField(
-        max_length=255,
-        verbose_name='Название комнаты'
-    )
+class Reservation(models.Model):
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
-        related_name='rooms',
+        related_name='reservations',
         verbose_name='Ресторан'
     )
-    section = models.ForeignKey(
-        Section,
-        on_delete=models.SET_NULL,
-        related_name='rooms',
-        null=True,
-        blank=True,
-        verbose_name='Секция'
-    )
-    room_type = models.ForeignKey(
-        RoomType,
-        on_delete=models.SET_NULL,
-        related_name='rooms',
-        null=True,
-        blank=True,
-        verbose_name='Тип комнаты'
-    )
-    capacity = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name='Вместимость (человек)'
-    )
-    area = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name='Площадь (кв.м)'
-    )
-    price_per_hour = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Цена за час',
-        help_text='Стоимость аренды комнаты за час'
-    )
-    description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Описание комнаты'
-    )
-    features = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Особенности и удобства',
-        help_text='Перечислите особенности комнаты (проектор, звуковое оборудование и т.д.)'
-    )
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name='Активна',
-        help_text='Отметьте, если комната доступна для бронирования'
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Дата обновления'
-    )
-
-    def __str__(self):
-        return f"{self.name} ({self.restaurant.name})"
-
-    class Meta:
-        verbose_name = 'Комната для мероприятий'
-        verbose_name_plural = 'Комнаты для мероприятий'
-        ordering = ['restaurant', 'name']
-        indexes = [
-            models.Index(fields=['restaurant', 'name']),
-            models.Index(fields=['is_active']),
-        ]
-        unique_together = ['restaurant', 'name']
-
-
-class RoomImage(models.Model):
-    room = models.ForeignKey(
-        Room,
+    table = models.ForeignKey(
+        Table,
         on_delete=models.CASCADE,
-        related_name='images',
-        verbose_name='Комната'
+        related_name='reservations',
+        verbose_name='Стол'
     )
-    image = models.ImageField(
-        upload_to='rooms/images/',
-        verbose_name='Фотография'
-    )
-    is_main = models.BooleanField(
-        default=False,
-        verbose_name='Главное фото',
-        help_text='Отметьте, если это главное фото комнаты'
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата добавления'
-    )
-
-    def __str__(self):
-        return f"Фото {self.id} комнаты {self.room.name}"
-
-    class Meta:
-        verbose_name = 'Фотография комнаты'
-        verbose_name_plural = 'Фотографии комнат'
-        ordering = ['-is_main', '-created_at']
-
-
-class Package(models.Model):
-    name = models.CharField(
-        max_length=255,
-        verbose_name='Название пакета'
-    )
-    room = models.ForeignKey(
-        Room,
-        on_delete=models.CASCADE,
-        related_name='packages',
-        verbose_name='Комната'
-    )
-    booking_type = models.ForeignKey(
-        BookingType,
-        on_delete=models.CASCADE,
-        related_name='packages',
-        verbose_name='Тип мероприятия'
-    )
-    description = models.TextField(
-        verbose_name='Описание пакета'
-    )
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Стоимость пакета',
-        help_text='Полная стоимость пакета (включая блюда)'
-    )
-    min_guests = models.PositiveIntegerField(
-        default=1,
-        verbose_name='Минимальное количество гостей'
-    )
-    max_guests = models.PositiveIntegerField(
-        verbose_name='Максимальное количество гостей'
-    )
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name='Активен',
-        help_text='Отметьте, если пакет доступен для бронирования'
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Дата обновления'
-    )
-
-    def __str__(self):
-        return f"{self.name} - {self.room.name} ({self.booking_type.name})"
-
-    class Meta:
-        verbose_name = 'Пакет услуг'
-        verbose_name_plural = 'Пакеты услуг'
-        ordering = ['room', 'name']
-        indexes = [
-            models.Index(fields=['room', 'booking_type']),
-            models.Index(fields=['is_active']),
-        ]
-
-
-class PackageMenu(models.Model):
-    package = models.ForeignKey(
-        Package,
-        on_delete=models.CASCADE,
-        related_name='menu_items',
-        verbose_name='Пакет услуг'
-    )
-    menu_item = models.ForeignKey(
-        Menu,
-        on_delete=models.CASCADE,
-        related_name='package_menus',
-        verbose_name='Блюдо'
-    )
-    quantity = models.PositiveIntegerField(
-        default=1,
-        verbose_name='Количество'
-    )
-    notes = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name='Примечания'
-    )
-
-    def __str__(self):
-        return f"{self.menu_item.name_ru} ({self.quantity} шт.) - {self.package.name}"
-
-    class Meta:
-        verbose_name = 'Блюдо в пакете'
-        verbose_name_plural = 'Блюда в пакете'
-        ordering = ['package', 'menu_item__name_ru']
-        unique_together = ['package', 'menu_item']
-
-
-class Booking(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Ожидает подтверждения'),
-        ('confirmed', 'Подтверждено'),
-        ('completed', 'Завершено'),
-        ('cancelled', 'Отменено'),
-    ]
-
-    room = models.ForeignKey(
-        Room,
-        on_delete=models.PROTECT,
-        related_name='bookings',
-        verbose_name='Комната'
-    )
-    package = models.ForeignKey(
-        Package,
-        on_delete=models.PROTECT,
-        related_name='bookings',
-        null=True,
-        blank=True,
-        verbose_name='Выбранный пакет'
-    )
-    booking_type = models.ForeignKey(
-        BookingType,
-        on_delete=models.PROTECT,
-        related_name='bookings',
-        verbose_name='Тип мероприятия'
-    )
-    client_name = models.CharField(
-        max_length=255,
-        verbose_name='Имя клиента'
-    )
-    client_phone = models.CharField(
-        max_length=20,
-        verbose_name='Телефон клиента'
-    )
-    client_email = models.EmailField(
-        null=True,
-        blank=True,
-        verbose_name='Email клиента'
-    )
-    date = models.DateField(
-        verbose_name='Дата мероприятия'
+    reservation_date = models.DateField(
+        verbose_name='Дата бронирования'
     )
     start_time = models.TimeField(
         verbose_name='Время начала'
@@ -303,32 +37,33 @@ class Booking(models.Model):
     end_time = models.TimeField(
         verbose_name='Время окончания'
     )
-    guests_count = models.PositiveIntegerField(
+    guest_count = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(20)],
         verbose_name='Количество гостей'
+    )
+    guest_name = models.CharField(
+        max_length=255,
+        verbose_name='Имя клиента'
+    )
+    guest_phone = models.CharField(
+        max_length=20,
+        verbose_name='Телефон клиента'
+    )
+    guest_email = models.EmailField(
+        null=True,
+        blank=True,
+        verbose_name='Email клиента'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=ReservationStatus.choices,
+        default=ReservationStatus.PENDING,
+        verbose_name='Статус бронирования'
     )
     special_requests = models.TextField(
         null=True,
         blank=True,
         verbose_name='Особые пожелания'
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending',
-        verbose_name='Статус бронирования'
-    )
-    total_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Общая стоимость',
-        help_text='Полная стоимость бронирования'
-    )
-    deposit = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name='Внесенная предоплата'
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -339,14 +74,72 @@ class Booking(models.Model):
         verbose_name='Дата обновления'
     )
 
-    def __str__(self):
-        return f"Бронирование {self.id} - {self.room.name} на {self.date}"
-
     class Meta:
         verbose_name = 'Бронирование'
         verbose_name_plural = 'Бронирования'
-        ordering = ['-date', '-start_time']
+        ordering = ['-reservation_date', '-start_time']
         indexes = [
-            models.Index(fields=['room', 'date']),
+            models.Index(fields=['reservation_date', 'start_time']),
             models.Index(fields=['status']),
+            models.Index(fields=['table', 'reservation_date']),
         ]
+
+    def __str__(self):
+        return f"{self.guest_name} - {self.restaurant.name} - Стол №{self.table.number} - {self.reservation_date}"
+
+    def clean(self):
+        if self.start_time and self.end_time and self.start_time >= self.end_time:
+            raise ValidationError('Время окончания должно быть позже времени начала')
+        
+        if self.reservation_date and self.reservation_date < timezone.now().date():
+            raise ValidationError('Нельзя создать бронирование на прошедшую дату')
+
+        if self.table and self.reservation_date and self.start_time and self.end_time:
+            conflicting_reservations = Reservation.objects.filter(
+                table=self.table,
+                reservation_date=self.reservation_date,
+                status__in=[ReservationStatus.PENDING, ReservationStatus.CONFIRMED]
+            ).exclude(pk=self.pk)
+            
+            for reservation in conflicting_reservations:
+                if ((self.start_time <= reservation.start_time < self.end_time) or
+                    (self.start_time < reservation.end_time <= self.end_time) or
+                    (reservation.start_time <= self.start_time < reservation.end_time) or
+                    (self.start_time <= reservation.start_time and self.end_time >= reservation.end_time)):
+                    raise ValidationError(f'Конфликт бронирования: стол уже забронирован с {reservation.start_time} до {reservation.end_time}')
+                    
+        # Проверка, что стол принадлежит указанному ресторану
+        if self.table and self.restaurant and self.table.section and self.table.section.restaurant != self.restaurant:
+            raise ValidationError('Выбранный стол не принадлежит указанному ресторану')
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ReservationMenuItem(models.Model):
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name='menu_items',
+        verbose_name='Бронирование'
+    )
+    menu_item = models.ForeignKey(
+        Menu,
+        on_delete=models.CASCADE,
+        related_name='reservation_items',
+        verbose_name='Блюдо'
+    )
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name='Количество'
+    )
+    
+    class Meta:
+        verbose_name = 'Блюдо для бронирования'
+        verbose_name_plural = 'Блюда для бронирования'
+        unique_together = ['reservation', 'menu_item']
+    
+    def __str__(self):
+        return f"{self.menu_item.name_ru} x{self.quantity} для {self.reservation}"
