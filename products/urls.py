@@ -10,5 +10,5 @@ router.register(r'menu-types', views.MenuTypeViewSet, basename='menu-type')
 
 urlpatterns = [
     path('dish/<int:dish_id>/', views.get_dish_details, name='dish_details'),
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
