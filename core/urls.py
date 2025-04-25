@@ -21,8 +21,9 @@ api_url_patterns = [
         path('cities/', include('cities.urls')),
         path('users/', include('users.urls')),
         path('restaurants/', include('restaurant.urls')),
-        path('products/', include('products.urls')),
+        path('products/', include('products.urls', namespace='products')),
         path('advertisements/', include('advertisement.urls')),
+        path('room/', include('room.urls', namespace='room')),  
     ])),
 ]
 
@@ -41,8 +42,9 @@ urlpatterns = [
         path('cities/', include('cities.urls')),
         path('users/', include('users.urls')),
         path('restaurants/', include('restaurant.urls')), 
-        path('products/', include('products.urls')),
-        path('advertisements/', include('advertisement.urls')),
+        path('products/', include('products.urls', namespace='products')),
+        path('advertisements/', include('advertisement.urls', namespace='advertisement')),
+        path('room/', include('room.urls', namespace='room')),  
     ])),
     
     path('api/docs/', include([
@@ -54,7 +56,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('accounts/', include('users.template_urls')),
     path('products/', include('products.urls')),
-    path('advertisement/', include('advertisement.urls', namespace='advertisement')),
+    path('advertisement/', include('advertisement.urls', namespace='advertisement_templates')),
 ]
 
 if settings.DEBUG:
