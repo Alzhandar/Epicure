@@ -23,3 +23,12 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = ['uuid', 'number', 'section', 'qr', 'call_waiter', 'call_time', 'bill_waiter', 'bill_time', 'iiko_waiter_id']
 
+class RestaurantMinSerializer(serializers.ModelSerializer):
+    city_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Restaurant
+        fields = ['id', 'name', 'city', 'city_name']
+    
+    def get_city_name(self, obj):
+        return obj.city.name if obj.city else None
