@@ -12,19 +12,19 @@ from django.db.models import Q
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'opening_time', 'closing_time', 'display_iiko_status', 'id')
+    list_display = ('name', 'city', 'opening_time', 'closing_time', 'display_iiko_status', 'id', 'photo')
     list_filter = ('city',)
     search_fields = ('name', 'city__name', 'iiko_organization_id')
     readonly_fields = ('get_created', 'get_modified')
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'city', 'opening_time', 'closing_time')
+            'fields': ('name', 'city', 'opening_time', 'closing_time', 'photo')
         }),
-        ('Интеграция с iiko', {
+        ('Интеграция c iiko', {
             'fields': ('iiko_organization_id', 'external_menu_id', 'price_category_id', 'department_id'),
             'classes': ('collapse',),
-            'description': 'Настройки для интеграции с системой iiko'
+            'description': 'Настройки для интеграции c системой iiko'
         }),
     )
 
@@ -67,7 +67,7 @@ class TableInline(admin.TabularInline):
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'restaurant', 'get_tables_count']
+    list_display = ['name', 'restaurant', 'get_tables_count', 'photo']
     list_filter = ['restaurant']
     search_fields = ['name', 'restaurant__name']
     autocomplete_fields = ['restaurant']

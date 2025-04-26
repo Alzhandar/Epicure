@@ -7,14 +7,14 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = ['id', 'name', 'city', 'iiko_organization_id', 'external_menu_id', 'price_category_id', 'department_id']
+        fields = ['id', 'name', 'city', 'opening_time', 'closing_time', 'iiko_organization_id', 'external_menu_id', 'price_category_id', 'department_id', 'photo']
 
 class SectionSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer()
 
     class Meta:
         model = Section
-        fields = ['id', 'name', 'restaurant']
+        fields = ['id', 'name', 'restaurant', 'photo']
 
 class TableSerializer(serializers.ModelSerializer):
     section = SectionSerializer()

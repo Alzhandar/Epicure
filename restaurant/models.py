@@ -14,6 +14,13 @@ class Restaurant(models.Model):
         max_length=100,
         verbose_name='Название ресторана'
     )
+    
+    photo = models.ImageField(
+        upload_to='restaurant_photos/',
+        verbose_name='Фото ресторана',
+        null=True,
+        blank=True
+    )
 
     city = models.ForeignKey(
         City,
@@ -81,6 +88,13 @@ class Section(models.Model):
     name = models.CharField(
         'Название секции',
         max_length=255
+    )
+    
+    photo = models.ImageField(
+        upload_to='section_photos/',
+        verbose_name='Фото секции',
+        null=True,
+        blank=True
     )
 
     def __str__(self):
