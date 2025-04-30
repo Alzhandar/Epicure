@@ -7,7 +7,7 @@ from django.db import models
 from django.core.files import File
 from django.conf import settings
 from cities.models import City
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -27,6 +27,30 @@ class Restaurant(models.Model):
         on_delete=models.CASCADE,
         related_name='restaurants',
         verbose_name='Город'
+    )
+
+    description_ru = models.TextField(
+        blank=True, 
+        null=True,
+        verbose_name='Описание на русском'
+    )
+
+    description_kz = models.TextField(
+        blank=True, 
+        null=True,
+        verbose_name='Описание на казахском'
+    )
+
+    rating = models.DecimalField(
+        max_digits=3, 
+        decimal_places=2, 
+        default=0.0,
+        verbose_name='Средний рейтинг'
+    )
+
+    reviews_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Количество отзывов'
     )
 
     iiko_organization_id = models.CharField(
@@ -105,6 +129,61 @@ class Section(models.Model):
         verbose_name_plural = 'Секции'
         indexes = [models.Index(fields=['restaurant', 'name'])]
         unique_together = ['restaurant', 'name']
+
+
+class Review(models.Model):
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Ресторан'
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='reviews',
+        verbose_name='Пользователь'
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name='Оценка (1-5)'
+    )
+    comment = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Комментарий'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+    
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['-created_at']
+        unique_together = ['restaurant', 'user']  
+    
+    def __str__(self):
+        return f"Отзыв {self.user} о {self.restaurant.name}: {self.rating}⭐"
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        restaurant = self.restaurant
+        reviews = Review.objects.filter(restaurant=restaurant)
+        total_rating = sum(review.rating for review in reviews)
+        count = reviews.count()
+        
+        restaurant.rating = total_rating / count if count > 0 else 0
+        restaurant.reviews_count = count
+        restaurant.save(update_fields=['rating', 'reviews_count'])
 
 
 class Table(models.Model):
