@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status, generics, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -18,7 +19,6 @@ from .serializers import (
 )
 from .permissions import IsUpdatingOwnAccount
 from .filters import UserFilter
-
 User = get_user_model()
 
 
@@ -176,3 +176,128 @@ class UserRegistrationView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save(is_active=True)
         return user
+    
+
+class ProfileViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+    
+    @swagger_auto_schema(
+        operation_description="Получение профиля текущего пользователя",
+        responses={
+            200: ProfileSerializer,
+            401: "Unauthorized"
+        },
+        tags=['mobile-app', 'profile']
+    )
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+    
+    @swagger_auto_schema(
+        operation_description="Обновление профиля пользователя",
+        request_body=UserUpdateSerializer,
+        responses={
+            200: ProfileSerializer,
+            400: "Bad Request",
+            401: "Unauthorized"
+        },
+        tags=['mobile-app', 'profile']
+    )
+    @action(detail=False, methods=['put', 'patch'])
+    def update_profile(self, request):
+        serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(ProfileSerializer(request.user).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_description="Загрузка или обновление аватара пользователя",
+        manual_parameters=[
+            openapi.Parameter(
+                'image', 
+                openapi.IN_FORM, 
+                description="Файл изображения", 
+                type=openapi.TYPE_FILE
+            )
+        ],
+        responses={
+            200: ProfileSerializer,
+            400: "Bad Request",
+            401: "Unauthorized"
+        },
+        tags=['mobile-app', 'profile']
+    )
+    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def upload_avatar(self, request):
+        if 'image' not in request.FILES:
+            return Response({'error': 'Изображение не предоставлено'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user = request.user
+        user.image = request.FILES['image']
+        user.save()
+        
+        return Response(ProfileSerializer(user).data)
+    
+    @swagger_auto_schema(
+        operation_description="Изменение пароля пользователя",
+        request_body=PasswordChangeSerializer,
+        responses={
+            200: "Success",
+            400: "Bad Request",
+            401: "Unauthorized"
+        },
+        tags=['mobile-app', 'profile']
+    )
+    @action(detail=False, methods=['post'])
+    def change_password(self, request):
+        serializer = PasswordChangeSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            
+            if not user.check_password(serializer.validated_data.get('current_password')):
+                return Response(
+                    {'current_password': ['Неверный текущий пароль']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            user.set_password(serializer.validated_data.get('new_password'))
+            user.save()
+            
+            return Response({'status': 'Пароль успешно изменен'})
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_description="Обновление языковых настроек пользователя",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['language'],
+            properties={
+                'language': openapi.Schema(type=openapi.TYPE_STRING, description='Код языка (ru, en)')
+            }
+        ),
+        responses={
+            200: ProfileSerializer,
+            400: "Bad Request",
+            401: "Unauthorized"
+        },
+        tags=['mobile-app', 'profile']
+    )
+    @action(detail=False, methods=['post'])
+    def update_language(self, request):
+        language = request.data.get('language')
+        
+        if not language:
+            return Response(
+                {'language': ['Это поле обязательно']},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        user = request.user
+        user.language = language
+        user.save()
+            
+        return Response(ProfileSerializer(user).data)
