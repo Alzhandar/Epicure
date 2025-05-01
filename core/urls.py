@@ -41,7 +41,7 @@ urlpatterns = [
     path('api/v1/', include([
         path('cities/', include('cities.urls')),
         path('users/', include('users.urls')),
-        path('restaurants/', include('restaurant.urls')), 
+        path('restaurants/', include('restaurant.urls')),
         path('products/', include('products.urls', namespace='products')),
         path('advertisements/', include('advertisement.urls', namespace='advertisement')),
         path('room/', include('room.urls', namespace='room')),  

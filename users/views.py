@@ -147,27 +147,32 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({"status": "Пользователь успешно деактивирован"})
 
 
+import logging
+logger = logging.getLogger(__name__)
+
 class UserRegistrationView(generics.CreateAPIView):
-    queryset = User.objects.all()
     serializer_class = UserCreateSerializer
     permission_classes = [AllowAny]
-    
-    @swagger_auto_schema(
-        operation_description="Регистрация нового пользователя",
-        responses={
-            201: openapi.Response(description="Пользователь успешно создан"),
-            400: openapi.Response(description="Некорректные данные")
-        },
-        tags=['users']
-    )
-    def post(self, request, *args, **kwargs):
+
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Получен запрос на регистрацию: {request.data}")
+        
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+        if not serializer.is_valid():
+            logger.error(f"Ошибки валидации: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            user = self.perform_create(serializer)
+            logger.info(f"Пользователь успешно создан: {user.phone_number}")
             return Response(
-                {"message": "Пользователь успешно зарегистрирован", "user": serializer.data},
-                status=status.HTTP_201_CREATED,
-                headers=headers
+                {"status": "success", "message": "User registered successfully"}, 
+                status=status.HTTP_201_CREATED
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Ошибка при создании пользователя: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True)
+        return user

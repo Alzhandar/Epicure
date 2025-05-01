@@ -85,7 +85,6 @@ class TableAvailabilityView(APIView):
             'date': date,
             'available_tables': TableSerializer(available_tables, many=True).data
         }
-        
         return Response(result)
 
 
