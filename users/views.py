@@ -146,6 +146,106 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({"status": "Пользователь успешно деактивирован"})
 
+    @swagger_auto_schema(
+        methods=['put', 'patch'], 
+        operation_description="Обновление профиля текущего пользователя",
+        request_body=UserUpdateSerializer,
+        responses={
+            200: openapi.Response(description="Профиль успешно обновлен"),
+            400: openapi.Response(description="Некорректные данные"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['put', 'patch'])
+    def update_profile(self, request):
+        user = request.user
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            profile_serializer = ProfileSerializer(user)
+            return Response(profile_serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_description="Загрузка фотографии профиля",
+        manual_parameters=[
+            openapi.Parameter(
+                name='image',
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                required=True,
+                description='Фотография профиля'
+            )
+        ],
+        responses={
+            200: openapi.Response(description="Фотография успешно загружена"),
+            400: openapi.Response(description="Некорректный файл"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['post'], url_path='upload-photo', parser_classes=[MultiPartParser, FormParser])
+    def upload_photo(self, request):
+        user = request.user
+        
+        if 'image' not in request.FILES:
+            return Response(
+                {'error': 'Отсутствует файл изображения'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        user.image = request.FILES['image']
+        user.save()
+        
+        return Response({
+            'status': 'success',
+            'message': 'Фотография профиля успешно обновлена',
+            'image_url': request.build_absolute_uri(user.image.url) if user.image else None
+        })
+    
+    @swagger_auto_schema(
+        operation_description="Удаление фотографии профиля",
+        responses={
+            200: openapi.Response(description="Фотография успешно удалена"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['delete'], url_path='delete-photo')
+    def delete_photo(self, request):
+        user = request.user
+        
+        if user.image:
+            user.image.delete(save=True)
+            user.image = None
+            user.save()
+            
+        return Response({
+            'status': 'success',
+            'message': 'Фотография профиля успешно удалена'
+        })
+    @swagger_auto_schema(
+        operation_description="Получение профиля текущего пользователя",
+        responses={
+            200: openapi.Response(
+                description="Успешное получение профиля",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    title="Профиль"
+                )
+            ),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile'] 
+    )
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -178,126 +278,3 @@ class UserRegistrationView(generics.CreateAPIView):
         return user
     
 
-class ProfileViewSet(viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    @swagger_auto_schema(
-        operation_description="Получение профиля текущего пользователя",
-        responses={
-            200: ProfileSerializer,
-            401: "Unauthorized"
-        },
-        tags=['mobile-app', 'profile']
-    )
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
-    
-    @swagger_auto_schema(
-        operation_description="Обновление профиля пользователя",
-        request_body=UserUpdateSerializer,
-        responses={
-            200: ProfileSerializer,
-            400: "Bad Request",
-            401: "Unauthorized"
-        },
-        tags=['mobile-app', 'profile']
-    )
-    @action(detail=False, methods=['put', 'patch'])
-    def update_profile(self, request):
-        serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(ProfileSerializer(request.user).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    @swagger_auto_schema(
-        operation_description="Загрузка или обновление аватара пользователя",
-        manual_parameters=[
-            openapi.Parameter(
-                'image', 
-                openapi.IN_FORM, 
-                description="Файл изображения", 
-                type=openapi.TYPE_FILE
-            )
-        ],
-        responses={
-            200: ProfileSerializer,
-            400: "Bad Request",
-            401: "Unauthorized"
-        },
-        tags=['mobile-app', 'profile']
-    )
-    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
-    def upload_avatar(self, request):
-        if 'image' not in request.FILES:
-            return Response({'error': 'Изображение не предоставлено'}, status=status.HTTP_400_BAD_REQUEST)
-            
-        user = request.user
-        user.image = request.FILES['image']
-        user.save()
-        
-        return Response(ProfileSerializer(user).data)
-    
-    @swagger_auto_schema(
-        operation_description="Изменение пароля пользователя",
-        request_body=PasswordChangeSerializer,
-        responses={
-            200: "Success",
-            400: "Bad Request",
-            401: "Unauthorized"
-        },
-        tags=['mobile-app', 'profile']
-    )
-    @action(detail=False, methods=['post'])
-    def change_password(self, request):
-        serializer = PasswordChangeSerializer(data=request.data)
-        if serializer.is_valid():
-            user = request.user
-            
-            if not user.check_password(serializer.validated_data.get('current_password')):
-                return Response(
-                    {'current_password': ['Неверный текущий пароль']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-                
-            user.set_password(serializer.validated_data.get('new_password'))
-            user.save()
-            
-            return Response({'status': 'Пароль успешно изменен'})
-            
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    @swagger_auto_schema(
-        operation_description="Обновление языковых настроек пользователя",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['language'],
-            properties={
-                'language': openapi.Schema(type=openapi.TYPE_STRING, description='Код языка (ru, en)')
-            }
-        ),
-        responses={
-            200: ProfileSerializer,
-            400: "Bad Request",
-            401: "Unauthorized"
-        },
-        tags=['mobile-app', 'profile']
-    )
-    @action(detail=False, methods=['post'])
-    def update_language(self, request):
-        language = request.data.get('language')
-        
-        if not language:
-            return Response(
-                {'language': ['Это поле обязательно']},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        user = request.user
-        user.language = language
-        user.save()
-            
-        return Response(ProfileSerializer(user).data)
