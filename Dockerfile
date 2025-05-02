@@ -1,29 +1,18 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE core.settings
+COPY requirements.txt .
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    postgresql-client \
-    libpq-dev \
-    gcc \
-    python3-dev \
-    libjpeg-dev \
-    zlib1g-dev && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install whitenoise
 
-COPY . /app/
+RUN mkdir -p /usr/src/app/static /usr/src/app/staticfiles /usr/src/app/media
 
-RUN mkdir -p /app/staticfiles /app/media
+COPY . .
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod -R 755 /usr/src/app/static /usr/src/app/staticfiles /usr/src/app/media
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
