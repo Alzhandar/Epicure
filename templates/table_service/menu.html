@@ -1,0 +1,862 @@
+{% extends 'table_service/base.html' %}
+
+{% block title %}Меню - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="menu-header-section">
+    <h1 class="page-title">Меню</h1>
+</div>
+
+<!-- Категории меню -->
+<div class="category-nav">
+    <div class="category-nav-inner">
+        <a href="javascript:void(0)" class="category-nav-link active" data-id="">Все блюда</a>
+        {% for type in menu_types %}
+            <a href="javascript:void(0)" class="category-nav-link" data-id="{{ type.id }}">{{ type.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Поиск по меню -->
+<div class="menu-filters">
+    <div class="search-container">
+        <input type="text" id="menuSearchInput" placeholder="Поиск блюд..." class="search-input">
+        <i class="fas fa-search search-icon"></i>
+    </div>
+</div>
+
+<!-- Контейнер для элементов меню -->
+<div id="menuItems" class="menu-items">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-pulse"></i>
+        <span>Загрузка меню...</span>
+    </div>
+</div>
+
+<!-- Сообщение, если меню пусто -->
+<div id="emptyMenu" class="empty-state" style="display: none;">
+    <i class="fas fa-utensils empty-icon"></i>
+    <h3>Блюда не найдены</h3>
+    <p>Попробуйте изменить фильтры или поисковый запрос</p>
+</div>
+
+<!-- Панель с информацией о текущем заказе -->
+<div class="order-summary" id="orderSummary" style="display: none;">
+    <div class="order-summary-inner">
+        <div class="order-info">
+            <div id="orderItemsCount">0 позиций</div>
+            <div id="orderTotalPrice">0 ₸</div>
+        </div>
+        <button id="viewOrderBtn" class="btn">Посмотреть заказ</button>
+    </div>
+</div>
+
+<!-- Модальное окно для деталей блюда -->
+<div id="dishModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="modalContent" class="dish-details"></div>
+    </div>
+</div>
+
+<!-- Шаблон для элемента меню -->
+<template id="menuItemTemplate">
+    <div class="menu-item">
+        <div class="menu-item-img-container">
+            <img src="" alt="" class="menu-item-img">
+        </div>
+        <div class="menu-item-info">
+            <h3 class="menu-item-title"></h3>
+            <p class="menu-item-desc"></p>
+            <div class="menu-item-price"></div>
+            <div class="menu-item-badge healthy-badge" style="display: none;">Здоровое питание</div>
+        </div>
+        <div class="menu-item-actions">
+            <button class="add-to-order-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- Шаблон для модального окна с деталями блюда -->
+<template id="dishDetailsTemplate">
+    <div class="dish-details-content">
+        <img src="" alt="" class="dish-details-img">
+        <h2 class="dish-details-title"></h2>
+        <div class="dish-details-price"></div>
+        <div class="dish-details-badge healthy-badge" style="display: none;">Здоровое питание</div>
+        <p class="dish-details-desc"></p>
+        
+        <div class="dish-nutrition">
+            <h3>Пищевая ценность</h3>
+            <div class="nutrition-grid">
+                <div class="nutrition-item">
+                    <span class="nutrition-value calories-value"></span>
+                    <span class="nutrition-label">Калории</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value proteins-value"></span>
+                    <span class="nutrition-label">Белки</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value fats-value"></span>
+                    <span class="nutrition-label">Жиры</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value carbs-value"></span>
+                    <span class="nutrition-label">Углеводы</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quantity-control">
+            <button class="quantity-btn minus-btn">
+                <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" min="1" value="1" class="quantity-input">
+            <button class="quantity-btn plus-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        
+        <button class="add-to-cart-btn">
+            Добавить в заказ
+        </button>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для заголовка */
+    .menu-header-section {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    /* Стили для категорий меню */
+    .category-nav {
+        position: sticky;
+        top: 0;
+        background-color: #ffffff;
+        z-index: 50;
+        padding: 10px 0;
+        margin-bottom: 15px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .category-nav-inner {
+        display: flex;
+        gap: 10px;
+        padding: 0 5px;
+    }
+    
+    .category-nav::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .category-nav-link {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        text-decoration: none;
+        color: var(--secondary-color);
+        border: 1px solid #e5e5e5;
+        background-color: #ffffff;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+    
+    .category-nav-link.active {
+        background-color: var(--dark-color);
+        color: var(--white-color);
+        border-color: var(--dark-color);
+    }
+    
+    /* Стили для фильтров */
+    .menu-filters {
+        margin-bottom: 20px;
+    }
+    
+    .search-container {
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 40px 12px 15px;
+        border: 1px solid #e5e5e5;
+        border-radius: 24px;
+        font-size: 16px;
+        background-color: #f5f5fa;
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+    }
+    
+    /* Стили для элементов меню */
+    .menu-items {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 80px;
+    }
+    
+    .menu-item {
+        background-color: #f5f5fa;
+        border-radius: 24px;
+        display: flex;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+    
+    .menu-item:active {
+        transform: scale(0.98);
+    }
+    
+    .menu-item-img-container {
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
+    }
+    
+    .menu-item-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .menu-item-info {
+        flex-grow: 1;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .menu-item-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 5px;
+        color: var(--dark-color);
+    }
+    
+    .menu-item-desc {
+        font-size: 14px;
+        color: var(--secondary-color);
+        margin: 0;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .menu-item-price {
+        margin-top: auto;
+        font-weight: bold;
+        color: var(--dark-color);
+    }
+    
+    .menu-item-badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 3px 6px;
+        border-radius: 12px;
+        margin-right: 5px;
+        font-weight: 500;
+    }
+    
+    .healthy-badge {
+        background-color: #f5f5fa;
+        color: var(--dark-color);
+        border: 1px solid var(--dark-color);
+    }
+    
+    .menu-item-actions {
+        display: flex;
+        align-items: flex-end;
+        padding: 10px;
+    }
+    
+    .add-to-order-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--dark-color);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .add-to-order-btn:hover {
+        opacity: 0.8;
+    }
+    
+    /* Стили для загрузки и пустого состояния */
+    .loading-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+        color: #999;
+    }
+    
+    .loading-spinner i {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: #999;
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    
+    /* Стили для панели заказа */
+    .order-summary {
+        position: fixed;
+        bottom: 70px;
+        left: 0;
+        right: 0;
+        background-color: var(--dark-color);
+        color: white;
+        padding: 12px 15px;
+        z-index: 90;
+        border-radius: 12px;
+        margin: 0 12px;
+    }
+    
+    .order-summary-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .order-info {
+        font-weight: bold;
+    }
+    
+    #viewOrderBtn {
+        background-color: white;
+        color: var(--dark-color);
+        padding: 8px 16px;
+        margin: 0;
+        width: auto;
+    }
+    
+    /* Стили для модального окна */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 200;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        overflow: auto;
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 0;
+        border-radius: 24px 24px 0 0;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 10;
+        color: var(--dark-color);
+    }
+    
+    .dish-details-content {
+        padding: 20px;
+        position: relative;
+        padding-top: 40px;
+    }
+    
+    .dish-details-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 24px;
+        margin-bottom: 15px;
+    }
+    
+    .dish-details-title {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: var(--dark-color);
+    }
+    
+    .dish-details-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--dark-color);
+        margin-bottom: 10px;
+    }
+    
+    .dish-details-desc {
+        margin: 15px 0;
+        line-height: 1.5;
+        color: var(--secondary-color);
+    }
+    
+    .dish-nutrition {
+        background-color: #f5f5fa;
+        padding: 15px;
+        border-radius: 24px;
+        margin: 20px 0;
+    }
+    
+    .dish-nutrition h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: var(--dark-color);
+    }
+    
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .nutrition-item {
+        text-align: center;
+    }
+    
+    .nutrition-value {
+        display: block;
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--dark-color);
+    }
+    
+    .nutrition-label {
+        font-size: 14px;
+        color: var(--secondary-color);
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 25px 0;
+    }
+    
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f5f5fa;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    .quantity-input {
+        width: 60px;
+        height: 40px;
+        border: 1px solid #e5e5e5;
+        text-align: center;
+        font-size: 18px;
+        margin: 0 10px;
+    }
+    
+    .add-to-cart-btn {
+        background-color: var(--dark-color);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 24px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        font-size: 18px;
+    }
+    
+    /* Медиа-запросы */
+    @media (min-width: 768px) {
+        .order-summary {
+            max-width: 500px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .modal-content {
+            width: 500px;
+            margin: 10vh auto;
+            border-radius: 24px;
+            top: 0;
+            bottom: auto;
+            max-height: 80vh;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы DOM
+        const menuItemsContainer = document.getElementById('menuItems');
+        const menuSearchInput = document.getElementById('menuSearchInput');
+        const categoryLinks = document.querySelectorAll('.category-nav-link');
+        const emptyMenuDiv = document.getElementById('emptyMenu');
+        const orderSummary = document.getElementById('orderSummary');
+        const orderItemsCount = document.getElementById('orderItemsCount');
+        const orderTotalPrice = document.getElementById('orderTotalPrice');
+        const viewOrderBtn = document.getElementById('viewOrderBtn');
+        const dishModal = document.getElementById('dishModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = document.querySelector('.close-modal');
+        
+        // Текущие данные
+        let menuItems = [];
+        let currentOrder = {
+            items: [],
+            total: 0
+        };
+        let currentCategoryId = '';
+        
+        // Загрузка меню при загрузке страницы
+        loadMenuItems();
+        
+        // Загрузка текущего заказа, если есть
+        checkCurrentOrder();
+        
+        // Обработчики событий
+        menuSearchInput.addEventListener('input', function() {
+            const searchQuery = this.value.trim();
+            loadMenuItems(searchQuery, currentCategoryId);
+        });
+        
+        // Обработчики для ссылок категорий
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                categoryLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentCategoryId = this.getAttribute('data-id');
+                loadMenuItems(menuSearchInput.value.trim(), currentCategoryId);
+            });
+        });
+        
+        closeModal.addEventListener('click', hideModal);
+        viewOrderBtn.addEventListener('click', function() {
+            window.location.href = '{% url "table_service:bill" table_uuid=table.uuid %}';
+        });
+        
+        // Закрыть модальное окно при клике вне содержимого
+        window.addEventListener('click', function(event) {
+            if (event.target === dishModal) {
+                hideModal();
+            }
+        });
+        
+        // Функция загрузки элементов меню
+        function loadMenuItems(searchQuery = '', categoryId = '') {
+            showLoading();
+            
+            const url = new URL('{% url "table_service:api_menu_items" table_uuid=table.uuid %}');
+            if (searchQuery) url.searchParams.append('q', searchQuery);
+            if (categoryId) url.searchParams.append('menu_type_id', categoryId);
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Сетевая ошибка при загрузке меню');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    menuItems = data.items;
+                    renderMenuItems(menuItems);
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Не удалось загрузить меню. Пожалуйста, попробуйте позже.', 'danger');
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+        
+        // Отображение элементов меню
+        function renderMenuItems(items) {
+            menuItemsContainer.innerHTML = '';
+            
+            if (items.length === 0) {
+                emptyMenuDiv.style.display = 'block';
+                return;
+            }
+            
+            emptyMenuDiv.style.display = 'none';
+            
+            const template = document.getElementById('menuItemTemplate');
+            
+            items.forEach(item => {
+                const menuItemElement = document.importNode(template.content, true);
+                
+                const image = menuItemElement.querySelector('.menu-item-img');
+                const title = menuItemElement.querySelector('.menu-item-title');
+                const desc = menuItemElement.querySelector('.menu-item-desc');
+                const price = menuItemElement.querySelector('.menu-item-price');
+                const healthyBadge = menuItemElement.querySelector('.healthy-badge');
+                const addButton = menuItemElement.querySelector('.add-to-order-btn');
+                const menuItem = menuItemElement.querySelector('.menu-item');
+                
+                title.textContent = item.name;
+                desc.textContent = item.description || '';
+                price.textContent = `${item.price} ₸`;
+                
+                if (item.image_url) {
+                    image.src = item.image_url;
+                    image.alt = item.name;
+                } else {
+                    image.src = 'https://via.placeholder.com/100x100?text=Нет+фото';
+                    image.alt = 'Нет фото';
+                }
+                
+                if (item.is_healthy) {
+                    healthyBadge.style.display = 'inline-block';
+                }
+                
+                // Добавление обработчика для открытия модального окна
+                menuItem.addEventListener('click', function(e) {
+                    if (!e.target.closest('.add-to-order-btn')) {
+                        showDishDetails(item);
+                    }
+                });
+                
+                // Добавление обработчика для кнопки "Добавить"
+                addButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Предотвратить открытие модального окна
+                    addToOrder(item.id, 1);
+                });
+                
+                menuItemsContainer.appendChild(menuItemElement);
+            });
+        }
+        
+        // Отображение деталей блюда
+        function showDishDetails(item) {
+            const template = document.getElementById('dishDetailsTemplate');
+            const detailsElement = document.importNode(template.content, true);
+            
+            const image = detailsElement.querySelector('.dish-details-img');
+            const title = detailsElement.querySelector('.dish-details-title');
+            const price = detailsElement.querySelector('.dish-details-price');
+            const desc = detailsElement.querySelector('.dish-details-desc');
+            const healthyBadge = detailsElement.querySelector('.dish-details-badge');
+            const caloriesValue = detailsElement.querySelector('.calories-value');
+            const proteinsValue = detailsElement.querySelector('.proteins-value');
+            const fatsValue = detailsElement.querySelector('.fats-value');
+            const carbsValue = detailsElement.querySelector('.carbs-value');
+            const addToCartBtn = detailsElement.querySelector('.add-to-cart-btn');
+            const minusBtn = detailsElement.querySelector('.minus-btn');
+            const plusBtn = detailsElement.querySelector('.plus-btn');
+            const quantityInput = detailsElement.querySelector('.quantity-input');
+            
+            title.textContent = item.name;
+            price.textContent = `${item.price} ₸`;
+            desc.textContent = item.description || 'Описание отсутствует';
+            
+            if (item.image_url) {
+                image.src = item.image_url;
+                image.alt = item.name;
+            } else {
+                image.src = 'https://via.placeholder.com/500x300?text=Нет+фото';
+                image.alt = 'Нет фото';
+            }
+            
+            if (item.is_healthy) {
+                healthyBadge.style.display = 'inline-block';
+            }
+            
+            // Заполнение информации о пищевой ценности
+            caloriesValue.textContent = item.calories ? `${item.calories} ккал` : '—';
+            proteinsValue.textContent = item.proteins ? `${item.proteins} г` : '—';
+            fatsValue.textContent = item.fats ? `${item.fats} г` : '—';
+            carbsValue.textContent = item.carbohydrates ? `${item.carbohydrates} г` : '—';
+            
+            // Обработчики событий для управления количеством
+            minusBtn.addEventListener('click', function() {
+                const currentVal = parseInt(quantityInput.value);
+                if (currentVal > 1) {
+                    quantityInput.value = currentVal - 1;
+                }
+            });
+            
+            plusBtn.addEventListener('click', function() {
+                const currentVal = parseInt(quantityInput.value);
+                quantityInput.value = currentVal + 1;
+            });
+            
+            // Обработчик добавления в заказ
+            addToCartBtn.addEventListener('click', function() {
+                const quantity = parseInt(quantityInput.value);
+                addToOrder(item.id, quantity);
+                hideModal();
+            });
+            
+            modalContent.innerHTML = '';
+            modalContent.appendChild(detailsElement);
+            
+            dishModal.style.display = 'block';
+        }
+        
+        // Скрыть модальное окно
+        function hideModal() {
+            dishModal.style.display = 'none';
+        }
+        
+        // Проверка текущего заказа
+        function checkCurrentOrder() {
+            fetch(`{% url "table_service:api_order_status" table_uuid=table.uuid %}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_order && data.orders.length > 0) {
+                        const order = data.orders[0]; // Берем первый активный заказ
+                        
+                        let totalItems = 0;
+                        order.items.forEach(item => {
+                            totalItems += item.quantity;
+                        });
+                        
+                        orderItemsCount.textContent = `${totalItems} ${getPlural(totalItems, 'позиция', 'позиции', 'позиций')}`;
+                        orderTotalPrice.textContent = `${order.total} ₸`;
+                        
+                        if (totalItems > 0) {
+                            orderSummary.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки заказа:', error);
+                });
+        }
+        
+        // Добавление в заказ
+        function addToOrder(menuItemId, quantity) {
+            const data = {
+                menu_item_id: menuItemId,
+                quantity: quantity
+            };
+            
+            fetch('{% url "table_service:api_add_to_order" table_uuid=table.uuid %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сетевая ошибка');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    
+                    // Обновление информации о заказе
+                    orderItemsCount.textContent = `${data.total_quantity} ${getPlural(data.total_quantity, 'позиция', 'позиции', 'позиций')}`;
+                    orderTotalPrice.textContent = `${data.order_total} ₸`;
+                    orderSummary.style.display = 'block';
+                } else {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Произошла ошибка при добавлении блюда в заказ', 'danger');
+            });
+        }
+        
+        // Вспомогательные функции
+        function showLoading() {
+            menuItemsContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-pulse"></i>
+                    <span>Загрузка меню...</span>
+                </div>
+            `;
+        }
+        
+        function hideLoading() {
+            const spinner = menuItemsContainer.querySelector('.loading-spinner');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+        
+        function getPlural(number, one, few, many) {
+            if (number % 10 === 1 && number % 100 !== 11) {
+                return one;
+            } else if ([2, 3, 4].indexOf(number % 10) !== -1 && 
+                      [12, 13, 14].indexOf(number % 100) === -1) {
+                return few;
+            } else {
+                return many;
+            }
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

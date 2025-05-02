@@ -1,0 +1,171 @@
+{% extends 'table_service/base.html' %}
+
+{% block title %}{{ restaurant.name }} - Стол №{{ table.number }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Добро пожаловать в {{ restaurant.name }}!</h1>
+
+<div class="service-buttons">
+    <button id="callWaiterBtn" class="btn {% if waiter_called %}btn-secondary{% endif %}" 
+            {% if waiter_called %}disabled{% endif %}>
+        {% if waiter_called %}
+            <i class="fas fa-check"></i> Официант вызван
+        {% else %}
+            <i class="fas fa-bell"></i> Позвать официанта
+        {% endif %}
+    </button>
+    
+    <button id="requestBillBtn" class="btn {% if bill_requested %}btn-secondary{% endif %}" 
+            {% if bill_requested %}disabled{% endif %}>
+        {% if bill_requested %}
+            <i class="fas fa-check"></i> Счет запрошен
+        {% else %}
+            <i class="fas fa-file-invoice-dollar"></i> Запросить счет
+        {% endif %}
+    </button>
+</div>
+
+<div class="restaurant-details">
+    <h2>О ресторане</h2>
+    <p>{{ restaurant.description_ru }}</p>
+    
+    <div class="restaurant-info-grid">
+        <div class="info-item">
+            <i class="fas fa-clock"></i>
+            <span>{{ restaurant.opening_time }} - {{ restaurant.closing_time }}</span>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>{{ restaurant.city }}</span>
+        </div>
+        {% if restaurant.rating %}
+        <div class="info-item">
+            <i class="fas fa-star"></i>
+            <span>{{ restaurant.rating }}/5 ({{ restaurant.reviews_count }} отзывов)</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .service-buttons {
+        margin: 20px 0;
+    }
+    
+    .restaurant-details {
+        margin-top: 30px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .restaurant-details h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: var(--secondary-color);
+    }
+    
+    .restaurant-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-item i {
+        margin-right: 10px;
+        color: var(--primary-color);
+        font-size: 18px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const callWaiterBtn = document.getElementById('callWaiterBtn');
+        const requestBillBtn = document.getElementById('requestBillBtn');
+        
+        callWaiterBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            
+            fetch('{% url "table_service:call_waiter" table_uuid=table.uuid %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = '<i class="fas fa-check"></i> Официант вызван';
+                    this.disabled = true;
+                    this.classList.add('btn-secondary');
+                    showNotification(data.message);
+                } else {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                showNotification('Произошла ошибка при вызове официанта', 'danger');
+                console.error('Error:', error);
+            });
+        });
+        
+        requestBillBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            
+            fetch('{% url "table_service:request_bill" table_uuid=table.uuid %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = '<i class="fas fa-check"></i> Счет запрошен';
+                    this.disabled = true;
+                    this.classList.add('btn-secondary');
+                    showNotification(data.message);
+                } else {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                showNotification('Произошла ошибка при запросе счета', 'danger');
+                console.error('Error:', error);
+            });
+        });
+        
+        // Функция для получения CSRF-токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

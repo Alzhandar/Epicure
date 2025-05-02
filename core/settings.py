@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'room',
     'payments',
     'advertisement',
+    'table_service',
 
     # libs
     'rest_framework',
