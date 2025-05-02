@@ -94,14 +94,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
-# Изменить блок настройки DATABASES на:
-
 IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT', 'False') == 'True'
-IS_DOCKER = os.getenv('DB_HOST') == 'db'  # Проверка для Docker
 
 if IS_RAILWAY:
-    # Настройки для Railway
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -112,28 +107,15 @@ if IS_RAILWAY:
             'PORT': '5432',
         }
     }
-elif IS_DOCKER:
-    # Настройки для Docker
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'railway'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': 'db',  # Имя сервиса в docker-compose
-            'PORT': '5432',
-        }
-    }
 else:
-    # Настройки для локального запуска
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME', 'railway'),
             'USER': os.getenv('DB_USER', 'postgres'),
             'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'HOST': os.getenv('DB_HOST', 'hopper.proxy.rlwy.net'),
+            'PORT': os.getenv('DB_PORT', '27211'),
         }
     }
 
