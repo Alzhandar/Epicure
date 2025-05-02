@@ -27,8 +27,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-knm0*%m_ir8uhwu8+(u##8hs90
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*']
-
+# Замените строку ALLOWED_HOSTS = ['*'] на:
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'epicure-wvby.onrender.com,localhost,127.0.0.1').split(',')
 
 # Application definition
 
@@ -260,3 +260,5 @@ else:
     ]
 
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8080')
+
+CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
