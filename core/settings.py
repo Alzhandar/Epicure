@@ -246,20 +246,16 @@ else:
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG 
 
-CORS_ALLOWED_ORIGINS = []
-if os.getenv('CORS_ALLOWED_ORIGINS'):
-    CORS_ALLOWED_ORIGINS = [origin for origin in os.getenv('CORS_ALLOWED_ORIGINS').split(',')]
-else:
-    CORS_ALLOWED_ORIGINS = [
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-        'http://localhost:8080',
-        'http://127.0.0.1:8080',
-        'https://epicure-wvby.onrender.com',
-        'http://epicure-wvby.onrender.com',
-    ]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'https://epicure-wvby.onrender.com',
+    'http://epicure-wvby.onrender.com/',
+]
 
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8080')
 
