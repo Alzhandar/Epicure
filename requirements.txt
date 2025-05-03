@@ -33,3 +33,5 @@ sentry-sdk==1.40.0
 sqlparse==0.4.4
 typing_extensions==4.9.0
 whitenoise==6.6.0
+django-storages 
+boto3
