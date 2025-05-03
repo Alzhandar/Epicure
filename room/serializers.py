@@ -14,7 +14,7 @@ class ReservationMenuItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ReservationMenuItem
-        fields = ['id', 'menu_item', 'menu_item_details', 'quantity']
+        fields = ['id', 'menu_item_details', 'quantity']
 
 
 class ReservationSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = [
-            'id', 'restaurant', 'restaurant_details', 'table', 'table_details',
+            'id', 'restaurant_details', 'table_details',
             'reservation_date', 'start_time', 'end_time', 'guest_count',
             'guest_name', 'guest_phone', 'guest_email', 'status', 'status_display',
             'special_requests', 'created_at', 'updated_at', 'menu_items'
