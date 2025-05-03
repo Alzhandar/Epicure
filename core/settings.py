@@ -23,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-knm0*%m_ir8uhwu8+(u##8hs90ot4@8x)oik#&cn9f=v&u4buy')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*']
-
+# Замените строку ALLOWED_HOSTS = ['*'] на:
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'epicure-wvby.onrender.com,localhost,127.0.0.1').split(',')
 
 # Application definition
 
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'room',
     'payments',
     'advertisement',
+    'table_service',
 
     # libs
     'rest_framework',
@@ -94,13 +95,30 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT', 'False') == 'True'
 
+if IS_RAILWAY:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'railway'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': 'postgres.railway.internal',  # Railway internal host
+            'PORT': '5432',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'railway'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'hopper.proxy.rlwy.net'),
+            'PORT': os.getenv('DB_PORT', '27211'),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -240,6 +258,11 @@ else:
         'http://127.0.0.1:8000',
         'http://localhost:8080',
         'http://127.0.0.1:8080',
+        'https://epicure-wvby.onrender.com',
+        'http://epicure-wvby.onrender.com',
     ]
 
-BASE_URL = os.getenv('BASE_URL', 'http://localhost:8080')
+BASE_URL = os.getenv('BASE_URL', 'https://epicure-wvby.onrender.com')
+
+CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
+

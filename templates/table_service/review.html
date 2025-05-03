@@ -1,0 +1,294 @@
+{% extends 'table_service/base.html' %}
+
+{% block title %}Оставить отзыв - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Оставить отзыв</h1>
+
+<div class="review-form">
+    <div class="restaurant-rating-info">
+        <div class="restaurant-rating">
+            <span class="rating-value">
+                {% if restaurant.rating %}
+                {{ restaurant.rating }}
+                {% else %}
+                Нет оценок
+                {% endif %}
+            </span>
+            <div class="stars">
+                {% for i in "12345" %}
+                    {% if restaurant.rating and forloop.counter <= restaurant.rating %}
+                        <i class="fas fa-star"></i>
+                    {% elif restaurant.rating and forloop.counter <= restaurant.rating|add:"0.5" %}
+                        <i class="fas fa-star-half-alt"></i>
+                    {% else %}
+                        <i class="far fa-star"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <span class="reviews-count">
+                {% if restaurant.reviews_count %}
+                    На основе {{ restaurant.reviews_count }} отзывов
+                {% else %}
+                    Будьте первым, кто оставит отзыв!
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <form id="reviewForm">
+        <div class="form-group">
+            <label>Ваша оценка:</label>
+            <div class="rating-stars">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
+                <input type="hidden" name="rating" id="ratingInput" value="0">
+            </div>
+            <div class="rating-text">Выберите оценку</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="commentInput">Ваш комментарий:</label>
+            <textarea id="commentInput" name="comment" placeholder="Поделитесь своими впечатлениями о посещении ресторана..." rows="6"></textarea>
+        </div>
+        
+        <button type="submit" class="btn" id="submitReviewBtn">Отправить отзыв</button>
+    </form>
+</div>
+
+<div id="reviewSuccess" class="review-success" style="display: none;">
+    <i class="fas fa-check-circle success-icon"></i>
+    <h2>Спасибо за ваш отзыв!</h2>
+    <p>Ваше мнение очень важно для нас и поможет другим гостям.</p>
+    <a href="{% url 'table_service:table_service' table_uuid=table.uuid %}" class="btn">Вернуться на главную</a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-form {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    
+    .restaurant-rating-info {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .restaurant-rating {
+        display: inline-block;
+    }
+    
+    .rating-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--secondary-color);
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .stars {
+        font-size: 20px;
+        color: var(--accent-color);
+        margin-bottom: 5px;
+    }
+    
+    .reviews-count {
+        font-size: 14px;
+        color: #777;
+        display: block;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .rating-stars {
+        font-size: 30px;
+        display: flex;
+        justify-content: space-between;
+        max-width: 250px;
+    }
+    
+    .rating-stars i {
+        color: var(--accent-color);
+        cursor: pointer;
+    }
+    
+    .rating-text {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #777;
+    }
+    
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 16px;
+        resize: vertical;
+    }
+    
+    .review-success {
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    
+    .success-icon {
+        font-size: 60px;
+        color: #27ae60;
+        margin-bottom: 15px;
+    }
+    
+    .review-success h2 {
+        margin-bottom: 10px;
+        color: var(--secondary-color);
+    }
+    
+    .review-success p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+    
+    @media (min-width: 768px) {
+        .review-form,
+        .review-success {
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.rating-stars i');
+        const ratingInput = document.getElementById('ratingInput');
+        const ratingText = document.querySelector('.rating-text');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewSuccess = document.getElementById('reviewSuccess');
+        
+        const ratingTexts = [
+            'Выберите оценку',
+            'Ужасно',
+            'Плохо',
+            'Нормально',
+            'Хорошо',
+            'Отлично'
+        ];
+        
+        // Обработка нажатия на звезды
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const rating = this.getAttribute('data-rating');
+                highlightStars(rating);
+                ratingText.textContent = ratingTexts[rating];
+            });
+            
+            star.addEventListener('mouseout', function() {
+                const currentRating = ratingInput.value;
+                highlightStars(currentRating);
+                ratingText.textContent = currentRating > 0 ? ratingTexts[currentRating] : ratingTexts[0];
+            });
+            
+            star.addEventListener('click', function() {
+                const rating = this.getAttribute('data-rating');
+                ratingInput.value = rating;
+                ratingText.textContent = ratingTexts[rating];
+            });
+        });
+        
+        // Подсветка звезд
+        function highlightStars(rating) {
+            stars.forEach(star => {
+                const starRating = star.getAttribute('data-rating');
+                if (starRating <= rating) {
+                    star.className = 'fas fa-star';
+                } else {
+                    star.className = 'far fa-star';
+                }
+            });
+        }
+        
+        // Обработка отправки формы
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const rating = ratingInput.value;
+            const comment = document.getElementById('commentInput').value;
+            
+            if (rating === '0') {
+                showNotification('Пожалуйста, выберите оценку', 'warning');
+                return;
+            }
+            
+            const data = {
+                rating: rating,
+                comment: comment
+            };
+            
+            fetch('{% url "table_service:api_submit_review" table_uuid=table.uuid %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сетевая ошибка');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    reviewForm.style.display = 'none';
+                    reviewSuccess.style.display = 'block';
+                } else {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Произошла ошибка при отправке отзыва', 'danger');
+            });
+        });
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

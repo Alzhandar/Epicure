@@ -1,0 +1,383 @@
+{% extends 'table_service/base.html' %}
+
+{% block title %}Счет - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Текущий счет</h1>
+
+<div id="billContent" class="bill-content">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-pulse"></i>
+        <span>Загрузка счета...</span>
+    </div>
+</div>
+
+<div id="emptyBill" class="empty-state" style="display: none;">
+    <i class="fas fa-receipt empty-icon"></i>
+    <h3>У вас нет активных заказов</h3>
+    <p>Выберите блюда из меню, чтобы начать заказ</p>
+    <a href="{% url 'table_service:menu' table_uuid=table.uuid %}" class="btn">Перейти в меню</a>
+</div>
+
+<template id="billTemplate">
+    <div class="bill-details">
+        <div class="bill-header">
+            <h3>Заказ #<span class="order-number"></span></h3>
+            <div class="order-status"></div>
+            <div class="order-time">Создан: <span class="created-time"></span></div>
+        </div>
+        
+        <div class="bill-items">
+            <!-- Заполняется динамически -->
+        </div>
+        
+        <div class="bill-summary">
+            <div class="summary-row">
+                <span>Сумма заказа:</span>
+                <span class="order-sum"></span>
+            </div>
+            <div class="summary-row">
+                <span>Обслуживание:</span>
+                <span class="service-fee"></span>
+            </div>
+            <div class="summary-row total-row">
+                <span>Итого к оплате:</span>
+                <span class="total-sum"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bill-actions">
+        <button class="btn" id="requestBillBtn">Попросить счет</button>
+    </div>
+</template>
+
+<template id="billItemTemplate">
+    <div class="bill-item">
+        <div class="item-info">
+            <div class="item-name"></div>
+            <div class="item-quantity">x <span class="quantity-value"></span></div>
+        </div>
+        <div class="item-price"></div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bill-content {
+        margin-bottom: 20px;
+    }
+    
+    .bill-details {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    
+    .bill-header {
+        padding: 15px;
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .bill-header h3 {
+        margin: 0 0 5px 0;
+    }
+    
+    .order-status {
+        font-size: 14px;
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background-color: rgba(255,255,255,0.2);
+    }
+    
+    .order-time {
+        font-size: 14px;
+        margin-top: 5px;
+        opacity: 0.8;
+    }
+    
+    .bill-items {
+        padding: 10px 15px;
+    }
+    
+    .bill-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .bill-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-info {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-weight: 500;
+    }
+    
+    .item-quantity {
+        font-size: 14px;
+        color: #666;
+        margin-top: 3px;
+    }
+    
+    .item-price {
+        font-weight: bold;
+        font-size: 16px;
+        color: var(--secondary-color);
+    }
+    
+    .bill-summary {
+        background-color: #f9f9f9;
+        padding: 15px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .total-row {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #ddd;
+    }
+    
+    .bill-actions {
+        margin-top: 20px;
+    }
+    
+    .loading-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+        color: #999;
+    }
+    
+    .loading-spinner i {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: #999;
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    
+    /* Стили для статусов заказа */
+    .status-new {
+        background-color: #f39c12 !important;
+    }
+    
+    .status-processing {
+        background-color: #3498db !important;
+    }
+    
+    .status-ready {
+        background-color: #27ae60 !important;
+    }
+    
+    .status-delivered {
+        background-color: #2ecc71 !important;
+    }
+    
+    .status-paid {
+        background-color: #8e44ad !important;
+    }
+    
+    .status-cancelled {
+        background-color: #e74c3c !important;
+    }
+    
+    @media (min-width: 768px) {
+        .bill-details {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .bill-actions {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const billContentDiv = document.getElementById('billContent');
+        const emptyBillDiv = document.getElementById('emptyBill');
+        
+        loadBill();
+        
+        // Периодическое обновление данных счета
+        const billUpdateInterval = setInterval(loadBill, 30000); // Каждые 30 секунд
+        
+        // Отмена интервала при уходе со страницы
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                clearInterval(billUpdateInterval);
+            } else {
+                loadBill();
+                billUpdateInterval = setInterval(loadBill, 30000);
+            }
+        });
+        
+        function loadBill() {
+            fetch('{% url "table_service:api_order_status" table_uuid=table.uuid %}')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Сетевая ошибка');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.has_order && data.orders.length > 0) {
+                        renderBill(data.orders);
+                        emptyBillDiv.style.display = 'none';
+                        billContentDiv.style.display = 'block';
+                    } else {
+                        billContentDiv.style.display = 'none';
+                        emptyBillDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки счета:', error);
+                    showNotification('Не удалось загрузить информацию о заказе', 'danger');
+                });
+        }
+        
+        function renderBill(orders) {
+            billContentDiv.innerHTML = '';
+            
+            orders.forEach(order => {
+                const template = document.getElementById('billTemplate');
+                const billElement = document.importNode(template.content, true);
+                
+                // Заполняем основную информацию о заказе
+                billElement.querySelector('.order-number').textContent = order.id;
+                
+                const statusElement = billElement.querySelector('.order-status');
+                statusElement.textContent = order.status;
+                statusElement.classList.add(`status-${order.status_code}`);
+                
+                billElement.querySelector('.created-time').textContent = formatDate(order.created_at);
+                billElement.querySelector('.order-sum').textContent = `${order.total} ₸`;
+                
+                // Расчет платы за обслуживание (например, 10%)
+                const serviceFee = order.total * 0.1;
+                const totalSum = order.total + serviceFee;
+                
+                billElement.querySelector('.service-fee').textContent = `${serviceFee.toFixed(2)} ₸ (10%)`;
+                billElement.querySelector('.total-sum').textContent = `${totalSum.toFixed(2)} ₸`;
+                
+                // Заполняем элементы заказа
+                const billItemsContainer = billElement.querySelector('.bill-items');
+                
+                order.items.forEach(item => {
+                    const itemTemplate = document.getElementById('billItemTemplate');
+                    const itemElement = document.importNode(itemTemplate.content, true);
+                    
+                    itemElement.querySelector('.item-name').textContent = item.name;
+                    itemElement.querySelector('.quantity-value').textContent = item.quantity;
+                    itemElement.querySelector('.item-price').textContent = `${item.total} ₸`;
+                    
+                    billItemsContainer.appendChild(itemElement);
+                });
+                
+                // Обработчик для кнопки запроса счета
+                const requestBillBtn = billElement.querySelector('#requestBillBtn');
+                
+                if (order.status_code === 'paid') {
+                    requestBillBtn.disabled = true;
+                    requestBillBtn.textContent = 'Счет оплачен';
+                } else {
+                    requestBillBtn.addEventListener('click', function() {
+                        requestBill();
+                    });
+                }
+                
+                billContentDiv.appendChild(billElement);
+            });
+        }
+        
+        function requestBill() {
+            fetch('{% url "table_service:request_bill" table_uuid=table.uuid %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('requestBillBtn');
+                    btn.disabled = true;
+                    btn.textContent = 'Счет запрошен';
+                    btn.classList.add('btn-secondary');
+                    
+                    showNotification(data.message);
+                } else {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Произошла ошибка при запросе счета', 'danger');
+            });
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

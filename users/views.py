@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status, generics, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -18,7 +19,6 @@ from .serializers import (
 )
 from .permissions import IsUpdatingOwnAccount
 from .filters import UserFilter
-
 User = get_user_model()
 
 
@@ -146,6 +146,106 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({"status": "Пользователь успешно деактивирован"})
 
+    @swagger_auto_schema(
+        methods=['put', 'patch'], 
+        operation_description="Обновление профиля текущего пользователя",
+        request_body=UserUpdateSerializer,
+        responses={
+            200: openapi.Response(description="Профиль успешно обновлен"),
+            400: openapi.Response(description="Некорректные данные"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['put', 'patch'])
+    def update_profile(self, request):
+        user = request.user
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            profile_serializer = ProfileSerializer(user)
+            return Response(profile_serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_description="Загрузка фотографии профиля",
+        manual_parameters=[
+            openapi.Parameter(
+                name='image',
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                required=True,
+                description='Фотография профиля'
+            )
+        ],
+        responses={
+            200: openapi.Response(description="Фотография успешно загружена"),
+            400: openapi.Response(description="Некорректный файл"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['post'], url_path='upload-photo', parser_classes=[MultiPartParser, FormParser])
+    def upload_photo(self, request):
+        user = request.user
+        
+        if 'image' not in request.FILES:
+            return Response(
+                {'error': 'Отсутствует файл изображения'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        user.image = request.FILES['image']
+        user.save()
+        
+        return Response({
+            'status': 'success',
+            'message': 'Фотография профиля успешно обновлена',
+            'image_url': request.build_absolute_uri(user.image.url) if user.image else None
+        })
+    
+    @swagger_auto_schema(
+        operation_description="Удаление фотографии профиля",
+        responses={
+            200: openapi.Response(description="Фотография успешно удалена"),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile']
+    )
+    @action(detail=False, methods=['delete'], url_path='delete-photo')
+    def delete_photo(self, request):
+        user = request.user
+        
+        if user.image:
+            user.image.delete(save=True)
+            user.image = None
+            user.save()
+            
+        return Response({
+            'status': 'success',
+            'message': 'Фотография профиля успешно удалена'
+        })
+    @swagger_auto_schema(
+        operation_description="Получение профиля текущего пользователя",
+        responses={
+            200: openapi.Response(
+                description="Успешное получение профиля",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    title="Профиль"
+                )
+            ),
+            401: openapi.Response(description="Не авторизован")
+        },
+        tags=['profile'] 
+    )
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -176,3 +276,5 @@ class UserRegistrationView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save(is_active=True)
         return user
+    
+
