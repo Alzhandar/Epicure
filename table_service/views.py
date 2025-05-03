@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.db.models import Sum, F, DecimalField
 from django.db.models.functions import Coalesce
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 from restaurant.models import Table, Restaurant, Review
 from products.models import Menu, MenuType
@@ -85,6 +87,7 @@ def bill_view(request, table_uuid):
     
     return render(request, 'table_service/bill.html', context)
 
+@csrf_exempt 
 @require_POST
 def call_waiter(request, table_uuid):
     """API для вызова официанта"""
@@ -107,6 +110,7 @@ def call_waiter(request, table_uuid):
             'message': 'Официант уже вызван и скоро подойдет'
         })
 
+@csrf_exempt 
 @require_POST
 def request_bill(request, table_uuid):
     """API для запроса счета"""
@@ -129,6 +133,7 @@ def request_bill(request, table_uuid):
             'message': 'Счет уже запрошен и скоро будет доставлен'
         })
 
+@csrf_exempt 
 def review_view(request, table_uuid):
     """Страница для оставления отзыва"""
     table = get_object_or_404(Table, uuid=table_uuid)
@@ -177,6 +182,7 @@ def menu_items_api(request, table_uuid):
     
     return JsonResponse({'items': data})
 
+@csrf_exempt 
 @require_POST
 def add_to_order(request, table_uuid):
     """API для добавления блюда в заказ"""
@@ -289,6 +295,7 @@ def order_status(request, table_uuid):
         'orders': order_data
     })
 
+@csrf_exempt 
 @require_POST
 def submit_review(request, table_uuid):
     """API для отправки отзыва"""
