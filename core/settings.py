@@ -262,7 +262,7 @@ else:
         'http://epicure-wvby.onrender.com',
     ]
 
-BASE_URL = os.getenv('BASE_URL', 'http://localhost:8080')
+BASE_URL = os.getenv('BASE_URL', 'https://epicure-wvby.onrender.com')
 
 CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
 
