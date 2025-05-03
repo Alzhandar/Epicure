@@ -33,7 +33,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [AllowAny()]
     
     @action(detail=False, methods=['GET'])
