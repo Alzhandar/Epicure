@@ -66,7 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
         },
         tags=['users'] 
     )
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
@@ -241,7 +241,7 @@ class UserViewSet(viewsets.ModelViewSet):
         },
         tags=['profile'] 
     )
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
