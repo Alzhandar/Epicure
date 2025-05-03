@@ -47,7 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'list']:
             permission_classes = [AllowAny]
         elif self.action in ['update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsUpdatingOwnAccount]
+            permission_classes = [IsAuthenticated, IsUpdatingOwnAccount] 
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
