@@ -25,6 +25,8 @@ api_url_patterns = [
         path('products/', include('products.urls', namespace='products')),
         path('advertisements/', include('advertisement.urls')),
         path('room/', include('room.urls', namespace='room')), 
+        path('offers/', include('offers.urls', namespace='offers')),
+        
 
     ])),
 ]
@@ -47,7 +49,8 @@ urlpatterns = [
         path('payments/', include('payments.urls')),
         path('products/', include('products.urls', namespace='products')),
         path('advertisements/', include('advertisement.urls', namespace='advertisement')),
-        path('room/', include('room.urls', namespace='room')),  
+        path('room/', include('room.urls', namespace='room')),
+        path('offers/', include('offers.urls', namespace='offers')),
     ])),
     
     path('api/docs/', include([
