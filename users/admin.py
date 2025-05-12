@@ -20,7 +20,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('phone_number', 'name', 'last_name', 'email', 'city')
+        fields = ('phone_number', 'username', 'email', 'city')
 
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
@@ -48,10 +48,10 @@ class CustomUserAdmin(UserAdmin):
     add_form = UserCreationForm
     form = UserChangeForm
     
-    list_display = ('phone_number', 'name', 'last_name', 'email', 'display_city', 
+    list_display = ('phone_number', 'username', 'email', 'display_city', 
                     'language', 'is_active', 'is_staff', 'display_photo')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'city', 'language', 'created_at')
-    search_fields = ('phone_number', 'name', 'last_name', 'email')
+    search_fields = ('phone_number', 'username', 'email')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
     date_hierarchy = 'created_at'
@@ -61,7 +61,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('phone_number', 'password')
         }),
         (_('Персональная информация'), {
-            'fields': ('name', 'last_name', 'email', 'city', 'image', 'language')
+            'fields': ('username', 'email', 'city', 'image', 'language')
         }),
         (_('Права доступа'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
@@ -76,7 +76,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('phone_number', 'name', 'last_name', 'email', 'city', 'password1', 'password2'),
+            'fields': ('phone_number', 'username', 'email', 'city', 'password1', 'password2'),
         }),
     )
 

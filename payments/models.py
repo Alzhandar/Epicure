@@ -1,4 +1,7 @@
+
 from django.db import models
+from users.models import User
+from room.models import Reservation
 
 
 class PaymentType(models.Model):
@@ -23,4 +26,3 @@ class PaymentType(models.Model):
         
         ordering = ['name']
         indexes = [models.Index(fields=['payment_type_id'])]
-

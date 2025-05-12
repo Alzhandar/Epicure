@@ -22,6 +22,8 @@ __pycache__/
 **/migrations/
 
 media/
+
+Epicure/core/settings.py
 # static/
 staticfiles/
 

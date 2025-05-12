@@ -11,7 +11,7 @@ class UserRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['phone_number', 'name', 'last_name', 'email', 'password', 'password2']
+        fields = ['phone_number', 'username', 'email', 'password', 'password2']
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')

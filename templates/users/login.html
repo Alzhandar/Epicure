@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% load socialaccount %}
+
 {% block title %}Вход - Epicure{% endblock %}
 
 {% block extra_css %}
@@ -82,6 +84,9 @@
         <div class="auth-footer">
             <p class="auth-footer-text">Нет аккаунта? <a href="{% url 'register' %}" class="auth-footer-link">Зарегистрируйтесь</a></p>
         </div>
+        <a href="{% provider_login_url 'google' %}">
+      <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Sign in with Google">
+  </a>
     </div>
 </div>
 {% endblock %}

@@ -53,25 +53,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
     @swagger_auto_schema(
-        operation_description="Получение профиля текущего пользователя",
-        responses={
-            200: openapi.Response(
-                description="Успешное получение профиля",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    title="Профиль"
-                )
-            ),
-            401: openapi.Response(description="Не авторизован")
-        },
-        tags=['users'] 
-    )
-    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
-    def me(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
-    
-    @swagger_auto_schema(
         operation_description="Изменение пароля пользователя",
         request_body=PasswordChangeSerializer,
         responses={

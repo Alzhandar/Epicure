@@ -35,15 +35,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         verbose_name='Номер телефона'
     )
-    name = models.CharField(
+    username = models.CharField(
         max_length=50,
-        verbose_name='Имя'
-    )
-    last_name = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-        verbose_name='Фамилия'
+        verbose_name='Имя пользователя'
     )
     city = models.ForeignKey(
         'cities.City',
@@ -58,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата и время обновления')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
     is_superuser = models.BooleanField(default=False, verbose_name='Суперадмин?')
-    is_active = models.BooleanField(default=False, verbose_name='Активен?')
+    is_active = models.BooleanField(default=True, verbose_name='Активен?')
     is_staff = models.BooleanField(default=False, verbose_name='Персонал?')
     language = models.CharField(
         max_length=2,

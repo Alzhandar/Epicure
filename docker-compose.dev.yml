@@ -4,8 +4,7 @@ services:
   web:
     build: .
     command: >
-      sh -c "python wait_for_postgres.py &&
-             python manage.py makemigrations &&
+      sh -c  python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
@@ -21,25 +20,10 @@ services:
       - PYTHONUNBUFFERED=1
       - DJANGO_SETTINGS_MODULE=core.settings
       - STATIC_ROOT=/usr/src/app/staticfiles
-    depends_on:
-      - db
     networks:
       - app_network
 
-  db:
-    image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5432:5432"
-    networks:
-      - app_network
+
 
 networks:
   app_network:
@@ -48,4 +32,4 @@ networks:
 volumes:
   static_volume:
   media_volume:
-  postgres_data:
+  
