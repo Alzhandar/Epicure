@@ -72,6 +72,24 @@ INSTALLED_APPS = [
     
 ]
 
+SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
+
+# Make Google provide profile and email info
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -269,6 +287,8 @@ else:
     ]
 
 BASE_URL = os.getenv('BASE_URL', 'https://epicure-wvby.onrender.com')
+
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'https://epicuresite.vercel.app/EN')
 
 CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
 

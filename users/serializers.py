@@ -9,18 +9,17 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'name', 'last_name', 'city', 'email', 
+        fields = ['id', 'phone_number', 'username',  'city', 'email', 
                   'is_active', 'language', 'created_at']
         read_only_fields = ['created_at']
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
     city = CitySerializer(read_only=True)
-    full_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'name', 'last_name', 'full_name', 'city', 
+        fields = ['id', 'phone_number', 'username', 'city', 
                  'image', 'email', 'is_active', 'language', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
@@ -31,7 +30,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['phone_number', 'name', 'last_name', 'city', 'email', 'password', 
+        fields = ['phone_number', 'username', 'city', 'email', 'password', 
                   'password_confirm', 'language']
 
     def validate(self, attrs):
@@ -50,7 +49,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['name', 'last_name', 'city', 'email', 'image', 'language']
+        fields = ['username',  'city', 'email', 'image', 'language']
 
 
 class PasswordChangeSerializer(serializers.Serializer):
@@ -70,5 +69,5 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'name', 'last_name', 'full_name', 'city', 
+        fields = ['id', 'phone_number', 'username',  'city', 
                  'image', 'email', 'language', 'is_active', 'is_staff', 'is_superuser']

@@ -23,7 +23,6 @@ __pycache__/
 
 media/
 
-Epicure/core/settings.py
 # static/
 staticfiles/
 
