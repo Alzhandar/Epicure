@@ -64,10 +64,25 @@ class PasswordChangeSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    city = CitySerializer(read_only=True)
-    full_name = serializers.CharField(read_only=True)
-
+    image_url = serializers.SerializerMethodField()
+    city_details = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'username',  'city', 
-                 'image', 'email', 'language', 'is_active', 'is_staff', 'is_superuser']
+        fields = [
+            'id', 'username', 'email', 'phone_number', 'image', 'image_url', 
+            'language', 'city', 'city_details', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+    
+    def get_city_details(self, obj):
+        if obj.city:
+            from cities.serializers import CitySerializer
+            return CitySerializer(obj.city).data
+        return None
