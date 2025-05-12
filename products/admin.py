@@ -13,10 +13,10 @@ class MenuTypeAdmin(admin.ModelAdmin):
 class MenuAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'name_ru', 'name_kz', 'restaurant', 'menu_type', 
-        'price', 'calories', 'is_available', 'created_at'
+        'price', 'calories', 'is_available', 'is_popular', 'created_at'
     )  
     list_filter = (
-        'restaurant', 'menu_type', 'is_available', 'created_at'
+        'restaurant', 'menu_type', 'is_available', 'is_popular','created_at'
     ) 
     search_fields = ('name_ru', 'name_kz', 'restaurant__name')  
     ordering = ('-created_at',) 
@@ -26,7 +26,7 @@ class MenuAdmin(admin.ModelAdmin):
             'fields': ('restaurant', 'menu_type', 'name_ru', 'name_kz', 'image', 'description_ru', 'description_kz')
         }),
         ('Дополнительная информация', {
-            'fields': ('calories', 'proteins', 'fats', 'carbohydrates', 'price', 'is_available')
+            'fields': ('calories', 'proteins', 'fats', 'carbohydrates', 'price', 'is_available', 'is_popular')
         }),
         ('Временные метки', {
             'fields': ('created_at', 'updated_at')

@@ -96,11 +96,23 @@ class MenuViewSet(viewsets.ModelViewSet):
         menu_item.save()
         serializer = self.get_serializer(menu_item)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def popular(self, request):
+        queryset = self.get_queryset().filter(is_popular=True)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['POST'])
+    def toggle_popularity(self, request, pk=None):
+        menu_item = self.get_object()
+        menu_item.is_popular = not menu_item.is_popular
+        menu_item.save()
+        serializer = self.get_serializer(menu_item)
+        return Response(serializer.data)
+    
 
 
 class MenuTypeViewSet(viewsets.ModelViewSet):
-    """
-    API для работы с типами меню
-    """
     queryset = MenuType.objects.all()
     serializer_class = MenuTypeSerializer
