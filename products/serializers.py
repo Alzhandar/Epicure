@@ -21,7 +21,7 @@ class MenuSerializer(serializers.ModelSerializer):
             'id', 'restaurant_details', 'menu_type_details',
             'name_ru', 'name_kz', 'image', 'image_url', 'description_ru', 'description_kz',
             'calories', 'proteins', 'fats', 'carbohydrates', 'price',
-            'is_available', 'created_at', 'updated_at'
+            'is_available', 'is_popular', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
     

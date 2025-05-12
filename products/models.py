@@ -24,6 +24,11 @@ class Menu(models.Model):
         related_name='menus',
         verbose_name='Ресторан'
     )
+    is_popular = models.BooleanField(
+        default=False,
+        verbose_name='Популярное блюдо',
+        help_text='Отметьте, если блюдо является популярным'
+    )
     menu_type = models.ForeignKey(
         MenuType,
         on_delete=models.SET_NULL,

@@ -16,7 +16,7 @@
     <i class="fas fa-receipt empty-icon"></i>
     <h3>У вас нет активных заказов</h3>
     <p>Выберите блюда из меню, чтобы начать заказ</p>
-    <a href="{% url 'table_service:menu' table_uuid=table.uuid %}" class="btn">Перейти в меню</a>
+    <a href="/{{ table.uuid }}/menu/" class="btn">Перейти в меню</a>
 </div>
 
 <template id="billTemplate">
@@ -229,11 +229,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         const billContentDiv = document.getElementById('billContent');
         const emptyBillDiv = document.getElementById('emptyBill');
+        const tableUuid = '{{ table.uuid }}';
         
         loadBill();
         
         // Периодическое обновление данных счета
-        const billUpdateInterval = setInterval(loadBill, 30000); // Каждые 30 секунд
+        let billUpdateInterval = setInterval(loadBill, 30000); // Каждые 30 секунд
         
         // Отмена интервала при уходе со страницы
         document.addEventListener('visibilitychange', function() {
@@ -246,7 +247,7 @@
         });
         
         function loadBill() {
-            fetch('{% url "table_service:api_order_status" table_uuid=table.uuid %}')
+            fetch(`/{{ table.uuid }}/api/order-status/${tableUuid}/`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Сетевая ошибка');
@@ -324,7 +325,7 @@
         }
         
         function requestBill() {
-            fetch('{% url "table_service:request_bill" table_uuid=table.uuid %}', {
+            fetch(`/{{ table.uuid }}/request-bill/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -377,6 +378,12 @@
                 }
             }
             return cookieValue;
+        }
+        
+        // Функция для отображения уведомлений
+        function showNotification(message, type = 'success') {
+            console.log(`[${type}] ${message}`);
+            // Тут можно реализовать визуальные уведомления
         }
     });
 </script>

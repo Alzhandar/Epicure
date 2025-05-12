@@ -550,6 +550,9 @@
         const modalContent = document.getElementById('modalContent');
         const closeModal = document.querySelector('.close-modal');
         
+        // Сохраняем UUID стола
+        const tableUuid = '{{ table.uuid }}';
+        
         // Текущие данные
         let menuItems = [];
         let currentOrder = {
@@ -583,7 +586,8 @@
         
         closeModal.addEventListener('click', hideModal);
         viewOrderBtn.addEventListener('click', function() {
-            window.location.href = '{% url "table_service:bill" table_uuid=table.uuid %}';
+            // Используем только относительный путь, без повторного добавления table_uuid
+            window.location.href = '/{{ table.uuid }}/bill/';
         });
         
         // Закрыть модальное окно при клике вне содержимого
@@ -597,9 +601,18 @@
         function loadMenuItems(searchQuery = '', categoryId = '') {
             showLoading();
             
-            const url = new URL('{% url "table_service:api_menu_items" table_uuid=table.uuid %}');
-            if (searchQuery) url.searchParams.append('q', searchQuery);
-            if (categoryId) url.searchParams.append('menu_type_id', categoryId);
+            // Используем только базовый URL и добавляем параметры вручную
+            let url = `/{{ table.uuid }}/api/menu-items/${tableUuid}/`;
+            
+            // Добавляем параметры запроса, если они есть
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('q', searchQuery);
+            if (categoryId) params.append('menu_type_id', categoryId);
+            
+            // Добавляем параметры к URL, если они есть
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
             
             fetch(url)
                 .then(response => {
@@ -752,7 +765,8 @@
         
         // Проверка текущего заказа
         function checkCurrentOrder() {
-            fetch(`{% url "table_service:api_order_status" table_uuid=table.uuid %}`)
+            // Используем относительный путь без добавления table_uuid
+            fetch(`/{{ table.uuid }}/api/order-status/${tableUuid}/`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.has_order && data.orders.length > 0) {
@@ -783,7 +797,8 @@
                 quantity: quantity
             };
             
-            fetch('{% url "table_service:api_add_to_order" table_uuid=table.uuid %}', {
+            // Используем относительный путь без добавления table_uuid
+            fetch(`/{{ table.uuid }}/api/add-to-order/${tableUuid}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -856,6 +871,14 @@
                 }
             }
             return cookieValue;
+        }
+        
+        // Функция для отображения уведомлений
+        function showNotification(message, type = 'success') {
+            // В этой функции можно реализовать отображение уведомлений
+            console.log(`[${type}] ${message}`);
+            // Или можно использовать библиотеку для уведомлений
+            // например toast или другие
         }
     });
 </script>
