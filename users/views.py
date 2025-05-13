@@ -19,6 +19,7 @@ import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from notifications.services import NotificationService
 
 from .serializers import (
     UserSerializer, 
@@ -251,6 +252,9 @@ class UserRegistrationView(generics.CreateAPIView):
         try:
             user = self.perform_create(serializer)
             logger.info(f"Пользователь успешно создан: {user.phone_number}")
+            NotificationService.send_welcome_notification(user)
+            logger.info(f"Отправлено приветственное уведомление для пользователя: {user.email}")
+            
             return Response(
                 {"status": "success", "message": "User registered successfully"}, 
                 status=status.HTTP_201_CREATED

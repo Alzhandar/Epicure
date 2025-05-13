@@ -34,6 +34,43 @@ class NotificationService:
             return None
 
     @staticmethod
+    def send_welcome_notification(user):
+        if not user.email:
+            logger.warning(f"Не удалось отправить приветственное уведомление: отсутствует email для пользователя {user.username}")
+            return None
+        
+        title = "Добро пожаловать в Epicure!"
+        message = f"""
+        Уважаемый(ая) {user.username},
+        
+        Мы рады приветствовать вас на нашей платформе Epicure! Теперь вы можете:
+        
+        • Бронировать столики в лучших ресторанах
+        • Изучать меню до своего визита
+        • Получать персональные рекомендации
+        • Накапливать бонусы за каждое посещение
+        
+        Не стесняйтесь обращаться к нам, если у вас возникнут вопросы.
+        
+        С наилучшими пожеланиями,
+        Команда Epicure
+        """
+        
+        notification = NotificationService.create_notification(
+            recipient_email=user.email,
+            recipient_phone=getattr(user, 'phone_number', None),
+            title=title,
+            message=message,
+            notification_type=NotificationType.WELCOME,
+            user=user
+        )
+        
+        if notification:
+            NotificationService.send_email_notification(notification)
+        
+        return notification
+
+    @staticmethod
     def send_payment_success_notification(reservation):
         if not reservation.guest_email:
             logger.warning(f"Не удалось отправить уведомление об оплате: отсутствует email для бронирования {reservation.id}")
@@ -80,6 +117,7 @@ class NotificationService:
             status=ReservationStatus.CONFIRMED
         )
         
+        sent_count = 0
         for reservation in reservations:
             if not reservation.guest_email:
                 continue
@@ -111,37 +149,64 @@ class NotificationService:
                 reservation=reservation
             )
             
-            if notification:
-                NotificationService.send_email_notification(notification)
-    
+            if notification and NotificationService.send_email_notification(notification):
+                sent_count += 1
+        
+        logger.info(f"Отправлено {sent_count} напоминаний о бронировании на завтра")
+        return sent_count
+
     @staticmethod
     def send_email_notification(notification):
         try:
+            context = {
+                'title': notification.title,
+                'message': notification.message,
+                'notification_id': notification.id,
+                'notification_type': notification.notification_type
+            }
+            
+            if notification.notification_type == NotificationType.WELCOME:
+                context['site_url'] = getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:3000')
+            
+            elif notification.notification_type == NotificationType.PAYMENT_SUCCESS and notification.reservation:
+                context['site_url'] = getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:3000')
+                context['reservation_id'] = notification.reservation.id
+            
             html_message = render_to_string(
                 'notifications/email_template.html',
-                {
-                    'title': notification.title,
-                    'message': notification.message,
-                    'notification_id': notification.id
-                }
+                context
             )
-            
             plain_message = strip_tags(html_message)
             
-            send_mail(
-                subject=notification.title,
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[notification.recipient_email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+            if settings.DEBUG and settings.EMAIL_BACKEND == 'django.core.mail.backends.console.EmailBackend':
+                send_mail(
+                    subject=notification.title,
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[notification.recipient_email],
+                    html_message=html_message,
+                    fail_silently=True,
+                )
+            else:
+                send_mail(
+                    subject=notification.title,
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[notification.recipient_email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
             
             notification.mark_as_sent()
             logger.info(f"Отправлено email-уведомление: {notification.id}")
             return True
-        
+            
         except Exception as e:
             notification.mark_as_failed()
             logger.error(f"Ошибка при отправке email-уведомления {notification.id}: {str(e)}")
+            
+            if settings.DEBUG:
+                notification.mark_as_sent()
+                return True
+            
             return False

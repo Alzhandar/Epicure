@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .header h1 {
+            color: #c94b4b;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px 0;
+            white-space: pre-line;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+            color: #666666;
+            font-size: 12px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #c94b4b;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        a {
+            color: #c94b4b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Epicure</h1>
+        </div>
+        
+        <div class="content">
+            <h2>{{ title }}</h2>
+            <p>{{ message }}</p>
+            
+            {% if notification_type == 'welcome' and site_url %}
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{{ site_url }}" class="button">Перейти на сайт</a>
+            </div>
+            {% endif %}
+            
+            {% if notification_type == 'payment_success' and site_url and reservation_id %}
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{{ site_url }}/reservations/{{ reservation_id }}" class="button">Просмотр бронирования</a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} Epicure. Все права защищены.</p>
+            <p>
+                Если вы не запрашивали это уведомление, пожалуйста, проигнорируйте его.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

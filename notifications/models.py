@@ -6,6 +6,7 @@ from room.models import Reservation
 
 
 class NotificationType(models.TextChoices):
+    WELCOME = 'welcome', 'Приветственное сообщение'
     PAYMENT_SUCCESS = 'payment_success', 'Успешная оплата'
     RESERVATION_REMINDER = 'reservation_reminder', 'Напоминание о бронировании'
     RESERVATION_CREATED = 'reservation_created', 'Бронирование создано'
@@ -73,12 +74,12 @@ class Notification(models.Model):
     def mark_as_read(self):
         self.status = NotificationStatus.READ
         self.read_at = timezone.now()
-        self.save()
+        self.save(update_fields=['status', 'read_at'])
     
     def mark_as_sent(self):
         self.status = NotificationStatus.SENT
-        self.save()
+        self.save(update_fields=['status'])
     
     def mark_as_failed(self):
         self.status = NotificationStatus.FAILED
-        self.save()
+        self.save(update_fields=['status'])
