@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'advertisement',
     'table_service',
     'offers',
+    'chat',
 
     # libs
     'rest_framework',

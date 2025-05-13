@@ -37,3 +37,4 @@ sqlparse==0.4.4
 typing_extensions==4.9.0
 whitenoise==6.6.0
 dj-rest-auth==7.0.1
+google-generativeai>=0.8.5

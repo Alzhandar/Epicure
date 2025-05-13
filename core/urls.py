@@ -16,6 +16,7 @@ api_info = openapi.Info(
     license=openapi.License(name="BSD License"),
 )
 
+
 api_url_patterns = [
     path('api/v1/', include([
         path('cities/', include('cities.urls')),
@@ -24,10 +25,9 @@ api_url_patterns = [
         path('payments/', include('payments.urls')),
         path('products/', include('products.urls', namespace='products')),
         path('advertisements/', include('advertisement.urls')),
-        path('room/', include('room.urls', namespace='room')), 
+        path('room/', include('room.urls', namespace='room')),
         path('offers/', include('offers.urls', namespace='offers')),
-        
-
+        path('chat/', include('chat.urls')),
     ])),
 ]
 
@@ -36,12 +36,14 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=[permissions.AllowAny],
     patterns=api_url_patterns,
-    authentication_classes=[], 
+    authentication_classes=[],
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('<uuid:table_uuid>/', include('table_service.urls')),
+
+
     path('api/v1/', include([
         path('cities/', include('cities.urls')),
         path('users/', include('users.urls')),
@@ -51,20 +53,23 @@ urlpatterns = [
         path('advertisements/', include('advertisement.urls', namespace='advertisement')),
         path('room/', include('room.urls', namespace='room')),
         path('offers/', include('offers.urls', namespace='offers')),
+        path('chat/', include('chat.urls')),
     ])),
-    
+
+
     path('api/docs/', include([
         re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
         path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
         path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     ])),
 
+
     path('', home_view, name='home'),
     path('accounts/', include('users.template_urls')),
     path('products/', include('products.urls')),
     path('advertisement/', include('advertisement.urls', namespace='advertisement_templates')),
-    
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
