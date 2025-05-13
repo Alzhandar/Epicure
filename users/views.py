@@ -9,6 +9,13 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
+import uuid
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -409,10 +416,44 @@ class ProfileViewSet(viewsets.ViewSet):
             return Response({'status': 'Пароль успешно изменен'})
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-    
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://localhost:3000/oauth2/callback/"
-    client_class = OAuth2Client
+
+
+class GoogleLoginView(APIView):
+    def post(self, request):
+        google_access_token = request.data.get('access_token')
+
+        # Step 1: Validate the Google token
+        google_userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        google_response = requests.get(google_userinfo_url, params={'access_token': google_access_token})
+        
+        if google_response.status_code != 200:
+            return Response({"error": "Invalid Google token"}, status=400)
+
+        # Step 2: Get the user's data from Google
+        google_data = google_response.json()
+        google_email = google_data.get('email')
+        google_user_id = google_data.get('sub')  # Unique identifier
+        google_given_name = google_data.get('given_name')  # First name
+
+        # Step 3: Build a unique phone number
+        fake_phone = f"google_{google_user_id}"
+
+        # Step 4: Create or retrieve user
+        User = get_user_model()
+        username = google_given_name if google_given_name else google_email.split('@')[0]
+
+        user, created = User.objects.get_or_create(
+            phone_number=fake_phone,
+            defaults={
+                'username': username,
+                'email': google_email,
+            }
+        )
+
+        # Step 5: Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        })

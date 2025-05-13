@@ -1,7 +1,5 @@
-# your_app/adapters.py
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
-from rest_framework_simplejwt.tokens import RefreshToken
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
@@ -19,12 +17,5 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         return user
     
     def get_login_redirect_url(self, request):
-        # Generate JWT token for the user
-        user = request.user
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        
-        # Redirect to frontend with JWT token
-        redirect_url = f"{settings.FRONTEND_BASE_URL}?token={access_token}"
-        
-        return redirect_url
+        # Always redirect to Vue.js frontend after social login
+        return settings.FRONTEND_BASE_URL
