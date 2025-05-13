@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import PaymentType
+from .models import PaymentType, StripePayment
 
 
 @admin.register(PaymentType)
@@ -47,3 +47,6 @@ class PaymentTypeAdmin(admin.ModelAdmin):
         css = {
             'all': ('admin/css/admin_styles.css',)
         }
+        
+        
+admin.site.register(StripePayment)
