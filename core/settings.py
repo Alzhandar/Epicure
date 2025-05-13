@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     
     # google
+    'dj_rest_auth',
     'django.contrib.sites',  
     'allauth',
     'allauth.account',
