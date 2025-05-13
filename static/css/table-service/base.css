@@ -1,0 +1,598 @@
+:root {
+  /* Основные цвета */
+  --primary: #1A1A1C;
+  --secondary: #2D2D30;
+  --accent: #FF3B30;
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --success: #34C759;
+  --warning: #FF9500;
+  --error: #FF3B30;
+  --info: #007AFF;
+  
+  /* Размеры и отступы */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --border-radius-xl: 32px;
+  
+  /* Анимации */
+  --transition-fast: 150ms;
+  --transition-base: 300ms;
+  --transition-slow: 500ms;
+  
+  /* Тени */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Глобальные стили и сброс */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  height: -webkit-fill-available;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+button {
+  background: none;
+  border: none;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Контейнер приложения */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* Статус-бар и шапка */
+.status-bar {
+  background-color: var(--secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-top: env(safe-area-inset-top, var(--spacing-sm));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.status-bar__section {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-bar__table {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-bar__section-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.status-bar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--secondary);
+}
+
+.status-bar__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Основной контент */
+.content {
+  flex-grow: 1;
+  padding: var(--spacing-lg) var(--spacing-md);
+  padding-bottom: calc(var(--spacing-xl) * 3); /* Пространство для нижнего меню */
+}
+
+.content-header {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.restaurant-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(90deg, #FF9500, #FF3B30);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-top: var(--spacing-sm);
+}
+
+/* Нижнее навигационное меню */
+.tab-bar {
+  background-color: var(--secondary);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-md) var(--spacing-sm);
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
+  z-index: 10;
+  box-shadow: 0 -1px 0 var(--border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.tab-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  flex: 1;
+  position: relative;
+  transition: transform var(--transition-fast);
+  color: var(--text-tertiary);
+}
+
+.tab-bar__item i {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.tab-bar__item span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: all var(--transition-base);
+}
+
+.tab-bar__item--active {
+  color: var(--accent);
+}
+
+.tab-bar__item--action {
+  color: var(--text-primary);
+}
+
+.tab-bar__item--action i {
+  background: linear-gradient(90deg, #FF9500, #FF3B30);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Панель действий (Action Sheet) */
+.action-sheet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.action-sheet--visible {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.action-sheet__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.action-sheet--visible .action-sheet__overlay {
+  opacity: 1;
+}
+
+.action-sheet__container {
+  position: relative;
+  background-color: var(--secondary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+  padding: var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+  box-shadow: var(--shadow-lg);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.action-sheet--visible .action-sheet__container {
+  transform: translateY(0);
+}
+
+.action-sheet__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.action-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border);
+}
+
+.action-item:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-md);
+  font-size: 1.25rem;
+}
+
+.action-item:nth-child(1) .action-item__icon {
+  color: var(--info);
+}
+
+.action-item:nth-child(2) .action-item__icon {
+  color: var(--warning);
+}
+
+.action-item:nth-child(3) .action-item__icon {
+  color: var(--success);
+}
+
+.action-item__content {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.action-item__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-item__subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.action-sheet__cancel {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.action-sheet__cancel:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Система уведомлений */
+.notification-container {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--spacing-xl));
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  z-index: 1000;
+  pointer-events: none;
+  padding: 0 var(--spacing-md);
+}
+
+.notification {
+  width: 100%;
+  max-width: 450px;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  pointer-events: all;
+}
+
+.notification--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.notification__icon {
+  font-size: 1.25rem;
+  margin-right: var(--spacing-md);
+}
+
+.notification--success .notification__icon {
+  color: var(--success);
+}
+
+.notification--warning .notification__icon {
+  color: var(--warning);
+}
+
+.notification--error .notification__icon {
+  color: var(--error);
+}
+
+.notification--info .notification__icon {
+  color: var(--info);
+}
+
+.notification__message {
+  flex-grow: 1;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.notification__close {
+  margin-left: var(--spacing-md);
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+}
+
+/* Основные карточки и сетки */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.card {
+  background-color: var(--secondary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  height: 140px;
+  position: relative;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card__image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.card__content {
+  padding: var(--spacing-sm);
+  background-color: var(--secondary);
+}
+
+.card__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__label {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background-color: var(--accent);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Таблица счета */
+.bill-table {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+  border-collapse: collapse;
+}
+
+.bill-table th {
+  text-align: left;
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.bill-table td {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.bill-table__total {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* Стили форм и кнопок */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn {
+  display: inline-block;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #FF9500, #FF3B30);
+  color: var(--text-primary);
+}
+
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* Адаптивные стили */
+@media (min-width: 640px) {
+  .content {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  
+  .tab-bar {
+    max-width: 640px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* Анимации и переходы */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-base) ease forwards;
+}
+
+.slide-up {
+  animation: slideUp var(--transition-base) ease forwards;
+}
+
+/* Утилиты */
+.text-center { text-align: center; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
