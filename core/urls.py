@@ -28,6 +28,7 @@ api_url_patterns = [
         path('room/', include('room.urls', namespace='room')),
         path('offers/', include('offers.urls', namespace='offers')),
         path('chat/', include('chat.urls')),
+        path('notifications/', include('notifications.urls', namespace='notifications')),
     ])),
 ]
 
@@ -54,6 +55,7 @@ urlpatterns = [
         path('room/', include('room.urls', namespace='room')),
         path('offers/', include('offers.urls', namespace='offers')),
         path('chat/', include('chat.urls')),
+        path('notifications/', include('notifications.urls', namespace='notifications')),
     ])),
 
 
