@@ -1,11 +1,9 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from django.conf import settings
-from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import StripePayment
-from room.models import Reservation, ReservationMenuItem
+from room.models import Reservation
 from decimal import Decimal
 from rest_framework.permissions import IsAuthenticated
 import stripe
@@ -157,3 +155,129 @@ class CreateCheckoutSessionView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error in checkout: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred', 'details': str(e)}, status=500)
+        
+        
+        
+
+class PaymentSuccessView(APIView):
+    """
+    API View to handle successful Stripe payments.
+    This endpoint verifies the payment session and updates the reservation status.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        session_id = request.query_params.get('session_id')
+        
+        if not session_id:
+            return Response({'error': 'Session ID is required'}, status=400)
+        
+        try:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            
+            # Retrieve the session to verify its status
+            session = stripe.checkout.Session.retrieve(session_id)
+            
+            if session.payment_status != 'paid':
+                logger.warning(f"Payment not completed for session {session_id}")
+                return Response({'error': 'Payment has not been completed'}, status=400)
+            
+            # Get the payment object using metadata from the session
+            payment_id = session.metadata.get('payment_id')
+            reservation_id = session.metadata.get('reservation_id')
+            
+            try:
+                payment = StripePayment.objects.get(id=payment_id)
+            except StripePayment.DoesNotExist:
+                logger.error(f"Payment {payment_id} not found")
+                return Response({'error': 'Payment record not found'}, status=404)
+            
+            # Update payment status
+            payment.status = 'completed'
+            payment.payment_date = timezone.now()
+            payment.save()
+            
+            # Update reservation status
+            reservation = payment.reservation
+            reservation.payment_status = 'paid'
+            reservation.save()
+            
+            # Email sending code removed
+            
+            return Response({
+                'status': 'success',
+                'message': 'Payment processed successfully',
+                'reservation_id': reservation.id,
+                'payment_id': payment.id,
+                'amount': payment.amount,
+                'currency': payment.currency
+            })
+            
+        except stripe.error.StripeError as stripe_error:
+            logger.error(f"Stripe Error in success handling: {stripe_error}")
+            return Response({'error': 'Payment verification failed', 'details': str(stripe_error)}, status=400)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in payment success: {e}", exc_info=True)
+            return Response({'error': 'An unexpected error occurred', 'details': str(e)}, status=500)
+
+
+class PaymentCancelView(APIView):
+    """
+    API View to handle canceled Stripe payments.
+    This endpoint ensures payments are properly marked as 'Canceled' in Stripe.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        session_id = request.query_params.get('session_id')
+        
+        # If no session_id provided, we'll still handle it
+        if session_id:
+            try:
+                stripe.api_key = settings.STRIPE_SECRET_KEY
+                
+                # 1. Retrieve the Stripe session
+                session = stripe.checkout.Session.retrieve(session_id)
+                
+                # 2. Cancel the payment intent (this will show as "Canceled" in the dashboard)
+                if hasattr(session, 'payment_intent') and session.payment_intent:
+                    payment_intent = stripe.PaymentIntent.retrieve(session.payment_intent)
+                    
+                    # Only cancel if it's in a state that can be canceled
+                    if payment_intent.status in ['requires_payment_method', 'requires_capture', 'requires_confirmation', 'requires_action', 'processing']:
+                        # This is what creates the "Canceled" status in the Stripe dashboard
+                        stripe.PaymentIntent.cancel(payment_intent.id)
+                        logger.info(f"Payment intent {payment_intent.id} has been canceled")
+                
+                # 3. Also expire the checkout session if it's still open
+                if session.status == 'open':
+                    stripe.checkout.Session.expire(session_id)
+                    logger.info(f"Session {session_id} has been expired")
+                
+                # 4. Update our database
+                payment_id = session.metadata.get('payment_id')
+                if payment_id:
+                    try:
+                        payment = StripePayment.objects.get(id=payment_id)
+                        payment.status = 'canceled'
+                        payment.canceled_at = timezone.now()
+                        payment.save()
+                        
+                        # Update the reservation status
+                        reservation = payment.reservation
+                        reservation.payment_status = 'unpaid'
+                        reservation.save()
+                        
+                        logger.info(f"Payment {payment_id} marked as canceled in database")
+                    except StripePayment.DoesNotExist:
+                        logger.warning(f"Payment {payment_id} not found for cancellation")
+            except stripe.error.StripeError as e:
+                logger.error(f"Stripe error when canceling payment: {e}")
+            except Exception as e:
+                logger.error(f"Error handling payment cancellation: {e}", exc_info=True)
+        
+        return Response({
+            'status': 'canceled',
+            'message': 'Payment was canceled'
+        })
