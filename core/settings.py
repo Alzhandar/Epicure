@@ -36,7 +36,7 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000/')
 
 SITE_ID = 1
 
@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     
     # google
     'dj_rest_auth',
+    'rest_framework.authtoken',
     'django.contrib.sites',  
     'allauth',
     'allauth.account',
