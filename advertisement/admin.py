@@ -46,7 +46,7 @@ class BannerStatusFilter(admin.SimpleListFilter):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ('title', 'position', 'status_badge', 'priority', 'display_period', 
+    list_display = ('title', 'title_kz', 'position', 'status_badge', 'priority', 'display_period',
                    'impressions', 'clicks', 'ctr_display')
     list_filter = (BannerStatusFilter, 'position', 'color_scheme', 'is_active')
     search_fields = ('title', 'subtitle', 'content')
@@ -55,6 +55,10 @@ class BannerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Основная информация', {
             'fields': ('title', 'subtitle', 'content', 'image')
+        }),
+        ('Локализация (Казахский)', {
+            'fields': ('title_kz', 'subtitle_kz', 'content_kz', 'button_text_kz'),
+            'classes': ('collapse',),
         }),
         ('Настройки отображения', {
             'fields': ('position', 'color_scheme', 'priority', 'is_active')

@@ -31,8 +31,11 @@ class Banner(models.Model):
     )
     
     title = models.CharField(max_length=200, verbose_name='Заголовок')
+    title_kz = models.CharField(max_length=200, null=True, blank=True, verbose_name='Заголовок (Казакша епт)')
     subtitle = models.CharField(max_length=300, blank=True, null=True, verbose_name='Подзаголовок')
+    subtitle_kz = models.CharField(max_length=300, null=True, blank=True, verbose_name='ПодЗаголовок (Казахский)')
     content = models.TextField(blank=True, null=True, verbose_name='Содержание')
+    content_kz = models.TextField(null=True, blank=True, verbose_name='Содержание (Казахский)')
     image = models.ImageField(upload_to=banner_image_path, verbose_name='Изображение', 
                              help_text='размер: 1200x400 пикселей')
     
@@ -40,6 +43,7 @@ class Banner(models.Model):
                          help_text='Внешняя ссылка или путь внутри сайта')
     button_text = models.CharField(max_length=50, blank=True, null=True, verbose_name='Текст кнопки',
                                  help_text='если кнопка не нужна')
+    button_text_kz = models.CharField(max_length=50, null=True, blank=True, verbose_name='Текст кнопки (Казахский)')
     
     start_date = models.DateTimeField(default=timezone.now, verbose_name='Дата начала показа')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name='Дата окончания показа',
