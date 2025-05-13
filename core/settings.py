@@ -38,7 +38,7 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000/')
 
-SITE_ID = 1
+SITE_ID = 3
 
 # Application definition
 
