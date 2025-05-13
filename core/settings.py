@@ -36,6 +36,8 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
+
 SITE_ID = 1
 
 # Application definition
@@ -159,8 +161,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = FRONTEND_BASE_URL
+ACCOUNT_LOGOUT_REDIRECT_URL = FRONTEND_BASE_URL
 
 
 # Internationalization
@@ -292,7 +294,7 @@ else:
 
 BASE_URL = os.getenv('BASE_URL', 'https://epicure-wvby.onrender.com')
 
-FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'https://epicuresite.vercel.app/EN')
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
 
 CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
 
