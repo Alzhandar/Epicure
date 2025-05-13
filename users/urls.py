@@ -16,7 +16,7 @@ profile_router.register(r'profile', ProfileViewSet, basename='profile')
 
 urlpatterns = [
     path('accounts/', include('allauth.urls')),
-    path("api/v1/users/accounts/google/login/", GoogleLogin.as_view(), name="google_login"),
+    path("accounts/google/login/", GoogleLogin.as_view(), name="google_login"),
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
     path('token/obtain/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
