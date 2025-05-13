@@ -9,7 +9,7 @@ class OfferItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OfferItem
-        fields = ['id', 'description', 'description_ru', 'description_kz', 'order']
+        fields = ['id', 'description_ru', 'description_kz', 'order']
 
     def get_description(self, obj):
         request = self.context.get('request')
@@ -28,7 +28,7 @@ class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = [
-            'id', 'restaurant', 'restaurant_details', 'title', 'title_ru', 'title_kz',
+            'id', 'restaurant', 'restaurant_details', 'title_ru', 'title_kz',
             'image', 'image_url', 'old_price', 'new_price', 'badge',
             'people_count', 'per_person', 'offer_type', 'items',
             'discount_percentage', 'is_active', 'created_at', 'updated_at'

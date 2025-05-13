@@ -6,28 +6,17 @@ from users.serializers import UserSerializer
 
 class RestaurantSerializer(serializers.ModelSerializer):
     city = CitySerializer()
-    name = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = [
             'id', 'name', 'city', 'opening_time', 'closing_time',
-            'description', 'description_ru', 'description_kz',
+            'description_ru', 'description_kz',
             'rating', 'reviews_count',
             'iiko_organization_id', 'external_menu_id',
             'price_category_id', 'department_id', 'photo'
         ]
 
-    def get_name(self, obj):
-        return obj.name  # у Restaurant нет локализованного name — просто возвращаем
-
-    def get_description(self, obj):
-        request = self.context.get('request')
-        lang = 'ru'
-        if request and request.user.is_authenticated:
-            lang = getattr(request.user, 'language', 'ru') or 'ru'
-        return obj.description_kz if lang == 'kz' and obj.description_kz else obj.description_ru
 
 
 class SectionSerializer(serializers.ModelSerializer):

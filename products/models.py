@@ -3,7 +3,7 @@ from restaurant.models import Restaurant
 
 
 class MenuType(models.Model):
-    name = models.CharField(
+    name_ru = models.CharField(
         max_length=100,
         unique=True,
         verbose_name='Тип меню'
