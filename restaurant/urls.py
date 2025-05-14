@@ -11,4 +11,4 @@ router.register(r'tables', TableViewSet, basename='table')
 router.register(r'', RestaurantViewSet, basename='restaurant')
 
 urlpatterns = router.urls
-from .views import test_spaces_upload
+
