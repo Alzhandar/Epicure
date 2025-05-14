@@ -23,10 +23,17 @@ class ReservationSerializer(serializers.ModelSerializer):
     table_details = TableSerializer(source='table', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     
+    restaurant = serializers.PrimaryKeyRelatedField(
+        queryset=Restaurant.objects.all(), 
+    )
+    table = serializers.PrimaryKeyRelatedField(
+        queryset=Table.objects.all(), 
+    )
+    
     class Meta:
         model = Reservation
         fields = [
-            'id', 'restaurant_details', 'table_details',
+            'id', 'restaurant', 'restaurant_details', 'table', 'table_details',
             'reservation_date', 'start_time', 'end_time', 'guest_count',
             'guest_name', 'guest_phone', 'guest_email', 'status', 'status_display',
             'special_requests', 'created_at', 'updated_at', 'menu_items'
