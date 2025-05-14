@@ -475,7 +475,6 @@ def google(request):
         new_user.is_active = True
         new_user.google = res_user_credentials
         new_user.phone_number = '87071362645'
-        new_user.image = str(res_user_credentials['picture'])
         new_user.save()
         new_user.set_password('123456789')
         
