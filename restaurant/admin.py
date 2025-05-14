@@ -252,7 +252,7 @@ class TableAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'restaurant_name', 'user_info', 'rating_stars', 'short_comment', 'created_at']
     list_filter = ['rating', 'restaurant', 'created_at']
-    search_fields = ['comment', 'user__phone_number', 'user__name', 'restaurant__name']
+    search_fields = ['comment', 'user__phone_number', 'user__username', 'restaurant__name']
     readonly_fields = ['created_at', 'updated_at']
     raw_id_fields = ['user', 'restaurant']
     
@@ -272,7 +272,7 @@ class ReviewAdmin(admin.ModelAdmin):
     
     def user_info(self, obj):
         if obj.user:
-            return f"{obj.user.name} {obj.user.last_name} ({obj.user.phone_number})"
+            return f"{obj.user.username} ({obj.user.phone_number})"
         return "Анонимно"
     user_info.short_description = 'Пользователь'
     
