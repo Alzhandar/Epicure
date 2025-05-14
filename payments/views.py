@@ -114,8 +114,8 @@ class CreateCheckoutSessionView(APIView):
                         'payment_id': str(payment.id)
                     },
                     customer_email=reservation.guest_email,
-                    success_url=f'{domain}/payment-success?session_id={{CHECKOUT_SESSION_ID}}',
-                    cancel_url=f'{domain}/payment-cancel',
+                    success_url=f'{domain}/success',
+                    cancel_url=f'{domain}/cancelled',
                 )
 
                 payment.stripe_payment_intent_id = session.payment_intent or session.id

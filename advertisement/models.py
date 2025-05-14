@@ -30,20 +30,16 @@ class Banner(models.Model):
         ('accent', 'Акцентный цвет'),
     )
     
-    title_ru = models.CharField(max_length=200, verbose_name='Заголовок')
-    title_kz = models.CharField(max_length=200, null=True, blank=True, verbose_name='Заголовок (Казакша епт)')
-    subtitle_ru = models.CharField(max_length=300, blank=True, null=True, verbose_name='Подзаголовок')
-    subtitle_kz = models.CharField(max_length=300, null=True, blank=True, verbose_name='ПодЗаголовок (Казахский)')
-    content_ru = models.TextField(blank=True, null=True, verbose_name='Содержание')
-    content_kz = models.TextField(null=True, blank=True, verbose_name='Содержание (Казахский)')
+    title = models.CharField(max_length=200, verbose_name='Заголовок')
+    subtitle = models.CharField(max_length=300, blank=True, null=True, verbose_name='Подзаголовок')
+    content = models.TextField(blank=True, null=True, verbose_name='Содержание')
     image = models.ImageField(upload_to=banner_image_path, verbose_name='Изображение', 
                              help_text='размер: 1200x400 пикселей')
     
     url = models.URLField(verbose_name='URL ссылки', blank=True, null=True, 
                          help_text='Внешняя ссылка или путь внутри сайта')
-    button_text_ru = models.CharField(max_length=50, blank=True, null=True, verbose_name='Текст кнопки',
+    button_text = models.CharField(max_length=50, blank=True, null=True, verbose_name='Текст кнопки',
                                  help_text='если кнопка не нужна')
-    button_text_kz = models.CharField(max_length=50, null=True, blank=True, verbose_name='Текст кнопки (Казахский)')
     
     start_date = models.DateTimeField(default=timezone.now, verbose_name='Дата начала показа')
     end_date = models.DateTimeField(blank=True, null=True, verbose_name='Дата окончания показа',

@@ -229,7 +229,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         const billContentDiv = document.getElementById('billContent');
         const emptyBillDiv = document.getElementById('emptyBill');
-        const tableUuid = '{{ table.uuid }}';
         
         loadBill();
         
@@ -247,15 +246,18 @@
         });
         
         function loadBill() {
-            fetch(`/{{ table.uuid }}/api/order-status/${tableUuid}/`)
+            console.log('Загружаем данные счета...');
+            fetch('api/order-status/')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Сетевая ошибка');
+                        console.error('Статус ответа:', response.status);
+                        throw new Error('Сетевая ошибка при загрузке счета');
                     }
                     return response.json();
                 })
                 .then(data => {
-                    if (data.has_order && data.orders.length > 0) {
+                    console.log('Получены данные о заказе:', data);
+                    if (data.has_order && data.orders && data.orders.length > 0) {
                         renderBill(data.orders);
                         emptyBillDiv.style.display = 'none';
                         billContentDiv.style.display = 'block';
@@ -297,16 +299,20 @@
                 // Заполняем элементы заказа
                 const billItemsContainer = billElement.querySelector('.bill-items');
                 
-                order.items.forEach(item => {
-                    const itemTemplate = document.getElementById('billItemTemplate');
-                    const itemElement = document.importNode(itemTemplate.content, true);
-                    
-                    itemElement.querySelector('.item-name').textContent = item.name;
-                    itemElement.querySelector('.quantity-value').textContent = item.quantity;
-                    itemElement.querySelector('.item-price').textContent = `${item.total} ₸`;
-                    
-                    billItemsContainer.appendChild(itemElement);
-                });
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach(item => {
+                        const itemTemplate = document.getElementById('billItemTemplate');
+                        const itemElement = document.importNode(itemTemplate.content, true);
+                        
+                        itemElement.querySelector('.item-name').textContent = item.name;
+                        itemElement.querySelector('.quantity-value').textContent = item.quantity;
+                        itemElement.querySelector('.item-price').textContent = `${item.total} ₸`;
+                        
+                        billItemsContainer.appendChild(itemElement);
+                    });
+                } else {
+                    billItemsContainer.innerHTML = '<p class="empty-items">В заказе нет позиций</p>';
+                }
                 
                 // Обработчик для кнопки запроса счета
                 const requestBillBtn = billElement.querySelector('#requestBillBtn');
@@ -325,7 +331,7 @@
         }
         
         function requestBill() {
-            fetch(`/{{ table.uuid }}/request-bill/`, {
+            fetch('request-bill/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -383,7 +389,18 @@
         // Функция для отображения уведомлений
         function showNotification(message, type = 'success') {
             console.log(`[${type}] ${message}`);
-            // Тут можно реализовать визуальные уведомления
+            // Можно реализовать более наглядные уведомления
+            const notificationElement = document.createElement('div');
+            notificationElement.className = `notification ${type}`;
+            notificationElement.innerHTML = message;
+            document.body.appendChild(notificationElement);
+            
+            setTimeout(() => {
+                notificationElement.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notificationElement);
+                }, 500);
+            }, 3000);
         }
     });
 </script>

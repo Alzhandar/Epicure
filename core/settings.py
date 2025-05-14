@@ -319,6 +319,7 @@ else:
         'http://127.0.0.1:8080',
         'https://epicure-wvby.onrender.com',
         'http://epicure-wvby.onrender.com',
+        'https://epicuresite.vercel.app',
     ]
 
 BASE_URL = os.getenv('BASE_URL', 'https://starfish-app-obbt2.ondigitalocean.app')
@@ -326,7 +327,7 @@ BASE_URL = os.getenv('BASE_URL', 'https://starfish-app-obbt2.ondigitalocean.app'
 FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
 
 CSRF_TRUSTED_ORIGINS.append('https://epicure-wvby.onrender.com')
-
+CSRF_TRUSTED_ORIGINS.append('https://epicuresite.vercel.app') 
 from datetime import timedelta
 
 
