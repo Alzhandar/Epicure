@@ -5,9 +5,17 @@ from restaurant.serializers import RestaurantMinSerializer, TableSerializer
 
 
 class OfferItemSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
+
     class Meta:
         model = OfferItem
         fields = ['id', 'description_ru', 'description_kz', 'order']
+
+    def get_description(self, obj):
+        request = self.context.get('request')
+        lang = getattr(request.user, 'language', 'ru') if request and request.user.is_authenticated else 'ru'
+        return obj.description_kz if lang == 'kz' and obj.description_kz else obj.description_ru
+
 
 
 class OfferSerializer(serializers.ModelSerializer):
@@ -15,28 +23,27 @@ class OfferSerializer(serializers.ModelSerializer):
     items = OfferItemSerializer(many=True, read_only=True)
     discount_percentage = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
 
     class Meta:
         model = Offer
         fields = [
-            'id', 'restaurant', 'restaurant_details', 'title_ru', 'title_kz', 
-            'image', 'image_url', 'old_price', 'new_price', 'badge', 
+            'id', 'restaurant', 'restaurant_details', 'title_ru', 'title_kz',
+            'image', 'image_url', 'old_price', 'new_price', 'badge',
             'people_count', 'per_person', 'offer_type', 'items',
             'discount_percentage', 'is_active', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
-    
-    def get_discount_percentage(self, obj):
-        if obj.old_price and obj.old_price > obj.new_price:
-            discount = ((obj.old_price - obj.new_price) / obj.old_price) * 100
-            return round(discount)
-        return 0
-    
-    def get_image_url(self, obj):
+
+    def get_title(self, obj):
         request = self.context.get('request')
-        if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
-        return None
+        lang = getattr(request.user, 'language', 'ru') if request and request.user.is_authenticated else 'ru'
+        return obj.title_kz if lang == 'kz' and obj.title_kz else obj.title_ru
+
+    def get_discount_percentage(self, obj):
+        ...
+    def get_image_url(self, obj):
+        ...
+
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):
