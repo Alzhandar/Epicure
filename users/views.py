@@ -1,24 +1,25 @@
+from urllib.parse import urlencode
 from rest_framework import viewsets, status, generics, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
-import uuid
-from rest_framework.views import APIView
+from django.contrib.auth.models import update_last_login
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 import requests
+from django.conf import settings
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from notifications.services import NotificationService
 
 from .serializers import (
     UserSerializer, 
@@ -251,6 +252,9 @@ class UserRegistrationView(generics.CreateAPIView):
         try:
             user = self.perform_create(serializer)
             logger.info(f"Пользователь успешно создан: {user.phone_number}")
+            NotificationService.send_welcome_notification(user)
+            logger.info(f"Отправлено приветственное уведомление для пользователя: {user.email}")
+            
             return Response(
                 {"status": "success", "message": "User registered successfully"}, 
                 status=status.HTTP_201_CREATED
@@ -418,42 +422,74 @@ class ProfileViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GoogleLoginView(APIView):
-    def post(self, request):
-        google_access_token = request.data.get('access_token')
-
-        # Step 1: Validate the Google token
-        google_userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
-        google_response = requests.get(google_userinfo_url, params={'access_token': google_access_token})
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def google(request):
+    form_data = {
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'client_secret': settings.GOOGLE_CLIENT_SECRET,
+        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+        'grant_type': 'authorization_code',
+        'code': request.data.get('code'),
+    }
+    form_encode = urlencode(form_data)
+    
+    get_google_access_token = requests.post(settings.GOOGLE_TOKEN_URI, 
+                                            headers={
+                                                'Content-Type': 'application/x-www-form-urlencoded'
+                                            },
+                                            data=form_encode)
+    res_access_token = get_google_access_token.json()
+    if 'error' in res_access_token:
+        return Response(res_access_token, status=get_google_access_token.status_code)
+    
+    get_user_credentials_from_google = requests.get(settings.GOOGLE_USER_INFO_URI,
+                                        headers={
+                                            'Authorization': f"Bearer {res_access_token['access_token']}"
+                                        })
+    res_user_credentials = get_user_credentials_from_google.json()
+    if 'error' in get_user_credentials_from_google:
+        return Response(res_user_credentials, status=res_user_credentials.status_code)
+    print('res_user_credentials', res_user_credentials)
+    
+    get_user = User.objects.filter(email=res_user_credentials['email'])
+    
+    if get_user.exists():
+        user = User.objects.get(email=res_user_credentials['email'])
+        user.is_active = True
+        user.google = res_user_credentials['email']
+        user.save()
         
-        if google_response.status_code != 200:
-            return Response({"error": "Invalid Google token"}, status=400)
-
-        # Step 2: Get the user's data from Google
-        google_data = google_response.json()
-        google_email = google_data.get('email')
-        google_user_id = google_data.get('sub')  # Unique identifier
-        google_given_name = google_data.get('given_name')  # First name
-
-        # Step 3: Build a unique phone number
-        fake_phone = f"google_{google_user_id}"
-
-        # Step 4: Create or retrieve user
-        User = get_user_model()
-        username = google_given_name if google_given_name else google_email.split('@')[0]
-
-        user, created = User.objects.get_or_create(
-            phone_number=fake_phone,
-            defaults={
-                'username': username,
-                'email': google_email,
-            }
-        )
-
-        # Step 5: Generate JWT tokens
-        refresh = RefreshToken.for_user(user)
-
+        update_last_login(None, user)
+        
+        create_tokens = RefreshToken.for_user(user)
         return Response({
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-        })
+            'access': str(create_tokens.access_token),
+            'refresh': str(create_tokens),
+        }, status=status.HTTP_200_OK)
+        
+    if not get_user.exists():
+        new_user = User()
+        new_user.username = res_user_credentials['email'].split('@')[0].lower()
+        new_user.email = res_user_credentials['email']
+        new_user.is_active = True
+        new_user.google = res_user_credentials
+        new_user.phone_number = '00000000000'
+        new_user.save()
+        new_user.set_password('123456789')
+        
+        update_last_login(None, new_user)
+        
+        create_tokens = RefreshToken.for_user(new_user)
+        return Response({
+            'access': str(create_tokens.access_token),
+            'refresh': str(create_tokens),
+        }, status=status.HTTP_200_OK)
+        
+    return Response({'message': 'Google'}, status=status.HTTP_200_OK)
+        
+    
+    
+                                        
+    
+        

@@ -86,6 +86,11 @@ SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
 # Make Google provide profile and email info
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        },
         'SCOPE': [
             'profile',
             'email',
@@ -217,6 +222,20 @@ REST_FRAMEWORK = {
     ],
 }
 
+# GOOGLE
+
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+GOOGLE_AUTH_URI = os.getenv('GOOGLE_AUTH_URI')
+GOOGLE_TOKEN_URI = os.getenv('GOOGLE_TOKEN_URI')
+GOOGLE_USER_INFO_URI = os.getenv('GOOGLE_USER_INFO_URI')
+GOOGLE_SCOPES = os.getenv('GOOGLE_SCOPES')
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@epicure.com'
+
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
@@ -327,3 +346,4 @@ SIMPLE_JWT = {
 
     'JTI_CLAIM': 'jti',
 }
+

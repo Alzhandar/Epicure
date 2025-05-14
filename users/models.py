@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=LanguageChoice.choices,
         verbose_name='Язык'
     )
+    google = models.JSONField(null=True, blank=True)
 
     objects = UserManager()
 

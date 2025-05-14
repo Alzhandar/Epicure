@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView, 
 )
 
-from .views import UserViewSet, UserRegistrationView, ProfileViewSet, GoogleLoginView
+from .views import UserViewSet, UserRegistrationView, ProfileViewSet, google
 
 router = DefaultRouter()
 router.register(r'', UserViewSet)
@@ -15,8 +15,8 @@ profile_router = DefaultRouter()
 profile_router.register(r'profile', ProfileViewSet, basename='profile')
 
 urlpatterns = [
-    path('accounts/', include('allauth.urls')),
-    path("auth/google/token/", GoogleLoginView.as_view(), name="google_login"),
+   # path('accounts/', include('allauth.urls')),
+    path("google/", google,  name="google_login"),
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
     path('token/obtain/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

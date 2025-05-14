@@ -49,7 +49,7 @@ class CustomUserAdmin(UserAdmin):
     form = UserChangeForm
     
     list_display = ('phone_number', 'username', 'email', 'display_city', 
-                    'language', 'is_active', 'is_staff', 'display_photo')
+                    'language', 'is_active', 'is_staff', 'display_photo', 'google')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'city', 'language', 'created_at')
     search_fields = ('phone_number', 'username', 'email')
     readonly_fields = ('created_at', 'updated_at')
