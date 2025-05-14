@@ -16,7 +16,7 @@ class MenuType(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return self.name_ru
 
     class Meta:
         verbose_name = 'Тип меню'

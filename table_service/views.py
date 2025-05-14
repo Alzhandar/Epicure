@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_POST, require_GET
 from django.utils import timezone
-from django.db.models import Sum, F, DecimalField
-from django.db.models.functions import Coalesce
+from django.db.models import Sum, F, DecimalField, Value
+from django.db.models.functions import Coalesce, Concat
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -52,7 +52,8 @@ def menu_view(request, table_uuid):
     table = get_object_or_404(Table, uuid=table_uuid)
     restaurant = table.section.restaurant
     
-    menu_types = MenuType.objects.filter(menus__restaurant=restaurant).distinct()
+    # Используем name_ru как основное имя для каждого типа меню
+    menu_types = MenuType.objects.filter(menus__restaurant=restaurant).distinct().values('id', 'name_ru')
     
     active_order = Order.objects.filter(
         table=table, 
@@ -149,7 +150,10 @@ def review_view(request, table_uuid):
 @require_GET
 def menu_items_api(request, table_uuid):
     """API для получения элементов меню"""
-    table = get_object_or_404(Table, uuid=table_uuid)
+    table = get_table_from_uuid(table_uuid)
+    if not table:
+        return JsonResponse({'error': 'Стол не найден'}, status=404)
+    
     restaurant = table.section.restaurant
     
     menu_type_id = request.GET.get('menu_type_id')
@@ -177,6 +181,10 @@ def menu_items_api(request, table_uuid):
             'price': float(item.price),
             'image_url': item.image.url if item.image else None,
             'menu_type_id': item.menu_type_id,
+            'calories': item.calories,
+            'proteins': float(item.proteins) if item.proteins else None,
+            'fats': float(item.fats) if item.fats else None,
+            'carbohydrates': float(item.carbohydrates) if item.carbohydrates else None,
             'is_healthy': item.is_healthy()
         })
     

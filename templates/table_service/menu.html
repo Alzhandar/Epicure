@@ -12,7 +12,7 @@
     <div class="category-nav-inner">
         <a href="javascript:void(0)" class="category-nav-link active" data-id="">Все блюда</a>
         {% for type in menu_types %}
-            <a href="javascript:void(0)" class="category-nav-link" data-id="{{ type.id }}">{{ type.name }}</a>
+            <a href="javascript:void(0)" class="category-nav-link" data-id="{{ type.id }}">{{ type.name_ru }}</a>
         {% endfor %}
     </div>
 </div>
@@ -550,9 +550,6 @@
         const modalContent = document.getElementById('modalContent');
         const closeModal = document.querySelector('.close-modal');
         
-        // Сохраняем UUID стола
-        const tableUuid = '{{ table.uuid }}';
-        
         // Текущие данные
         let menuItems = [];
         let currentOrder = {
@@ -586,7 +583,6 @@
         
         closeModal.addEventListener('click', hideModal);
         viewOrderBtn.addEventListener('click', function() {
-            // Используем только относительный путь, без повторного добавления table_uuid
             window.location.href = '/{{ table.uuid }}/bill/';
         });
         
@@ -601,8 +597,8 @@
         function loadMenuItems(searchQuery = '', categoryId = '') {
             showLoading();
             
-            // Используем только базовый URL и добавляем параметры вручную
-            let url = `/{{ table.uuid }}/api/menu-items/${tableUuid}/`;
+            // Исправленный URL для API
+            let url = '/{{ table.uuid }}/api/menu-items/';
             
             // Добавляем параметры запроса, если они есть
             const params = new URLSearchParams();
@@ -765,8 +761,8 @@
         
         // Проверка текущего заказа
         function checkCurrentOrder() {
-            // Используем относительный путь без добавления table_uuid
-            fetch(`/{{ table.uuid }}/api/order-status/${tableUuid}/`)
+            // Исправленный URL для API заказа
+            fetch('/{{ table.uuid }}/api/order-status/')
                 .then(response => response.json())
                 .then(data => {
                     if (data.has_order && data.orders.length > 0) {
@@ -797,8 +793,8 @@
                 quantity: quantity
             };
             
-            // Используем относительный путь без добавления table_uuid
-            fetch(`/{{ table.uuid }}/api/add-to-order/${tableUuid}/`, {
+            // Исправленный URL для API добавления в заказ
+            fetch('/{{ table.uuid }}/api/add-to-order/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
