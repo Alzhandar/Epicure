@@ -61,7 +61,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('phone_number', 'password')
         }),
         (_('Персональная информация'), {
-            'fields': ('username', 'email', 'city', 'image', 'language')
+            'fields': ('username', 'email', 'city', 'image', 'language', 'google')
         }),
         (_('Права доступа'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
