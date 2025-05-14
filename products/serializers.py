@@ -16,7 +16,7 @@ class MenuTypeSerializer(serializers.ModelSerializer):
         lang = 'ru'
         if request and request.user.is_authenticated:
             lang = getattr(request.user, 'language', 'ru') or 'ru'
-        return obj.name_kz if lang == 'kz' and obj.name_kz else obj.name
+        return obj.name_kz if lang == 'kz' and obj.name_kz else obj.name_ru
 
 
 class MenuSerializer(serializers.ModelSerializer):
@@ -61,7 +61,6 @@ class MenuSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             lang = getattr(request.user, 'language', 'ru') or 'ru'
         return obj.description_kz if lang == 'kz' and obj.description_kz else obj.description_ru
-
 
 
 class MenuMinSerializer(serializers.ModelSerializer):
