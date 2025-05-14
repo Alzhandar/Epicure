@@ -321,7 +321,7 @@ else:
         'http://epicure-wvby.onrender.com',
     ]
 
-BASE_URL = os.getenv('BASE_URL', 'https://epicure-wvby.onrender.com')
+BASE_URL = os.getenv('BASE_URL', 'https://starfish-app-obbt2.ondigitalocean.app')
 
 FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
 

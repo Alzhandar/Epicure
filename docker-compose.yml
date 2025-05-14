@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
       - static_volume:/usr/src/app/staticfiles
-      - media_volume:/usr/src/app/media
+      - media_volume:/usr/src/app/media  # Важно для хранения медиа-файлов
     ports:
       - "8000:8000"
     env_file:
@@ -21,6 +21,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+      - USE_DO_SPACES=False  # Принудительно отключаем DO Spaces
     command: bash /usr/src/app/entrypoint.sh
     networks:
       - app_network
@@ -39,6 +40,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DJANGO_SETTINGS_MODULE=core.settings
+      - USE_DO_SPACES=False  
     networks:
       - app_network
 

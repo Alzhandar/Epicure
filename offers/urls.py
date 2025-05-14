@@ -7,6 +7,5 @@ app_name = 'offers'
 router = DefaultRouter()
 router.register(r'offers', OfferViewSet, basename='offer')
 router.register(r'offer-items', OfferItemViewSet, basename='offer-item')
-router.register(r'reservations', OfferReservationViewSet, basename='reservation')
 
 urlpatterns = router.urls

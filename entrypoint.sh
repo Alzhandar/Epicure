@@ -26,5 +26,9 @@ python manage.py migrate
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+echo "Setting up media directory..."
+mkdir -p /usr/src/app/media
+chmod -R 777 /usr/src/app/media
+
 echo "Starting Gunicorn..."
 gunicorn core.wsgi:application --bind 0.0.0.0:8000

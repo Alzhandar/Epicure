@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
 from django.urls import reverse
-from django.db.models import F, ExpressionWrapper, FloatField, Q
+from django.db.models import F, ExpressionWrapper, FloatField, Q, Case, When, Value
 from .models import Banner
 
 
@@ -96,20 +96,26 @@ class BannerAdmin(admin.ModelAdmin):
     def ctr_display(self, obj):
         if obj.impressions == 0:
             return "Нет данных"
-        ctr = float(obj.ctr)
-        color = "green" if ctr > 5 else "#f29c13" if ctr > 2 else "red"
-        return format_html('<span style="color: {}; font-weight: bold">{:.2f}%</span>', color, ctr)
-
+            
+        try:
+            ctr = (obj.clicks / obj.impressions) * 100 if obj.impressions > 0 else 0
+            
+            if ctr > 5:
+                color = "green"
+            elif ctr > 2:
+                color = "#f29c13"  
+            else:
+                color = "red"
+                
+            formatted_ctr = f"{ctr:.2f}%"
+            return format_html('<span style="color: {}; font-weight: bold">{}</span>', 
+                              color, formatted_ctr)
+        except (ZeroDivisionError, TypeError):
+            return "Нет данных"
+    
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.annotate(
-            ctr_value=ExpressionWrapper(
-                F('clicks') * 100.0 / F('impressions'),
-                output_field=FloatField()
-            )
-        )
-        return qs
-
+        return super().get_queryset(request)
+    
     def get_ordering(self, request):
         return ['-priority', '-start_date']
 
