@@ -60,3 +60,25 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
 
+
+from django.core.files.storage import default_storage
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+def test_spaces_upload(request):
+    if 'file' not in request.FILES:
+        return Response({'error': 'Файл не найден'}, status=400)
+        
+    file = request.FILES['file']
+    filename = default_storage.save(f'test_uploads/{file.name}', file)
+    file_url = default_storage.url(filename)
+    
+    return Response({
+        'success': True,
+        'filename': filename,
+        'url': file_url,
+        'storage_type': 'Digital Ocean Spaces' 
+    })

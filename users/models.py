@@ -8,17 +8,20 @@ class LanguageChoice(models.TextChoices):
     KAZAKH = 'kz', _('Қазақша')
 
 class UserManager(BaseUserManager):
-    def _create_user(self, password, **extra_fields):
-        user = self.model(**extra_fields)
+    def _create_user(self, phone_number, password, **extra_fields):
+        if not phone_number:
+            raise ValueError(_('Номер телефона должен быть указан'))
+        
+        user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, password=None, **extra_fields):
+    def create_user(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(password, **extra_fields)
+        return self._create_user(phone_number, password, **extra_fields)
 
-    def create_superuser(self, password, **extra_fields):
+    def create_superuser(self, phone_number, password, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_active', True)
@@ -26,7 +29,7 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(password, **extra_fields)
+        return self._create_user(phone_number, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -60,12 +63,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=LanguageChoice.choices,
         verbose_name='Язык'
     )
-    google = models.JSONField(null=True, blank=True)
+    google = models.TextField(null=True, blank=True, verbose_name='Google данные')
 
     objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.phone_number
@@ -76,4 +79,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @property
     def full_name(self):
-        return f'{self.last_name} {self.name}' if self.last_name else self.name
+        return self.username

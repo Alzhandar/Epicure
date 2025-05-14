@@ -1,12 +1,9 @@
+version: '3.9'
+
 services:
   web:
     build: .
-    command: >
-      sh -c "
-             python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
+    restart: always
     volumes:
       - .:/usr/src/app
       - static_volume:/usr/src/app/staticfiles
@@ -18,7 +15,30 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DJANGO_SETTINGS_MODULE=core.settings
-      - STATIC_ROOT=/usr/src/app/staticfiles
+      - DATABASE_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+    command: bash /usr/src/app/entrypoint.sh
+    networks:
+      - app_network
+
+  migration:
+    build: .
+    command: >
+      bash -c "
+        echo 'Waiting for PostgreSQL...' &&
+        sleep 5 &&
+        python manage.py migrate"
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=core.settings
     networks:
       - app_network
 

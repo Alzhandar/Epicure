@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'drf_yasg',
+    'storages',
     
     # google
     'dj_rest_auth',
@@ -146,11 +147,17 @@ IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT', 'False') == 'True'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'defaultdb'),
+        'USER': os.getenv('DB_USER', 'doadmin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'AVNS_N2SQ0MA-UCTJGD1-f8D'),
+        'HOST': os.getenv('DB_HOST', 'db-postgresql-fra1-86645-do-user-21661746-0.d.db.ondigitalocean.com'),
+        'PORT': os.getenv('DB_PORT', '25060'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -347,3 +354,20 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
+if os.getenv('USE_DO_SPACES', 'False').lower() == 'true':
+    AWS_ACCESS_KEY_ID = os.getenv('DO_SPACES_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY = os.getenv('DO_SPACES_SECRET_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('DO_SPACES_NAME', 'ddd')
+    AWS_S3_REGION_NAME = os.getenv('DO_SPACES_REGION', 'fra1')
+    AWS_S3_ENDPOINT_URL = os.getenv('DO_SPACES_ENDPOINT')
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_LOCATION = 'media'
+    AWS_QUERYSTRING_AUTH = False 
+    AWS_S3_FILE_OVERWRITE = False  
+    
+    DEFAULT_FILE_STORAGE = 'core.custom_storage.MediaStorage'
+    
+    MEDIA_URL = f'https://ddd.fra1.digitaloceanspaces.com/{AWS_LOCATION}/'
