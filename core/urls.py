@@ -42,7 +42,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('<uuid:table_uuid>/', include('table_service.urls')),
+    path('', include('table_service.urls')),
 
 
     path('api/v1/', include([
