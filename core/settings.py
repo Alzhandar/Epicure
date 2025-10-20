@@ -148,14 +148,11 @@ IS_RAILWAY = os.getenv('RAILWAY_ENVIRONMENT', 'False') == 'True'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'defaultdb'),
-        'USER': os.getenv('DB_USER', 'doadmin'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'db-postgresql-fra1-86645-do-user-21661746-0.d.db.ondigitalocean.com'),
-        'PORT': os.getenv('DB_PORT', '25060'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'NAME': os.getenv('DB_NAME', 'epicure_db'),
+        'USER': os.getenv('DB_USER', 'epicure_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'epicure_password_123'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 # Password validation
@@ -372,3 +369,4 @@ if os.getenv('USE_DO_SPACES', 'False').lower() == 'true':
     DEFAULT_FILE_STORAGE = 'core.custom_storage.MediaStorage'
     
     MEDIA_URL = f'https://ddd.fra1.digitaloceanspaces.com/{AWS_LOCATION}/'
+

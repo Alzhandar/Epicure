@@ -1,10 +1,19 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=epicure_db
+      - POSTGRES_USER=epicure_user  
+      - POSTGRES_PASSWORD=epicure_password_123
+
   web:
     build: .
     command: >
-      sh -c  python manage.py makemigrations &&
+      sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
@@ -13,23 +22,14 @@ services:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/media
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file:
       - .env
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DJANGO_SETTINGS_MODULE=core.settings
-      - STATIC_ROOT=/usr/src/app/staticfiles
-    networks:
-      - app_network
-
-
-
-networks:
-  app_network:
-    driver: bridge
+    depends_on:
+      - db
 
 volumes:
+  postgres_data:
   static_volume:
   media_volume:
   
