@@ -27,8 +27,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-knm0*%m_ir8uhwu8+(u##8hs90
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-# Замените строку ALLOWED_HOSTS = ['*'] на:
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'epicure-wvby.onrender.com,localhost,127.0.0.1,0.0.0.0').split(',')
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED_HOSTS') != '*' else ['*']
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
