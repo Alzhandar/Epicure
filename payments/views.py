@@ -15,7 +15,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 
 class CreateCheckoutSessionView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         reservation_id = request.data.get('reservation_id')
@@ -164,7 +163,6 @@ class PaymentSuccessView(APIView):
     API View to handle successful Stripe payments.
     This endpoint verifies the payment session and updates the reservation status.
     """
-    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         session_id = request.query_params.get('session_id')
@@ -227,7 +225,6 @@ class PaymentCancelView(APIView):
     API View to handle canceled Stripe payments.
     This endpoint ensures payments are properly marked as 'Canceled' in Stripe.
     """
-    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         session_id = request.query_params.get('session_id')
